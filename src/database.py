@@ -3,7 +3,7 @@ import dotenv
 from sqlalchemy import create_engine
 
 def database_connection_url():
-    dotenv.load_dotenv()
+    dotenv.load_dotenv("../.env")
 
     return os.environ.get("POSTGRES_URI")
 
