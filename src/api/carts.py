@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
 from src.api import auth
 from enum import Enum
+import sqlalchemy
+from src import database as db
+
 
 router = APIRouter(
     prefix="/carts",
@@ -21,6 +24,7 @@ class search_sort_order(str, Enum):
 
 @router.get("/search/", tags=["search"])
 def search_orders(
+    #don't do this yet
     customer_name: str = "",
     potion_sku: str = "",
     search_page: str = "",
@@ -85,6 +89,7 @@ def post_visits(visit_id: int, customers: list[Customer]):
 @router.post("/")
 def create_cart(new_cart: Customer):
     """ """
+    #don't touch yet
     return {"cart_id": 1}
 
 
@@ -94,6 +99,7 @@ class CartItem(BaseModel):
 
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
+    #don't touch yet
     """ """
 
     return "OK"
@@ -105,5 +111,16 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
-
+    sql_to_fetch = "SELECT num_green_potions FROM global_inventory"
+    with db.engine.begin() as connection:
+        result = connection.execute(sqlalchemy.text(sql_to_fetch)).fetchone()
+        
+        #Check if there are green potions available for sale
+        if result is None or result[0] <= 0:
+            raise HTTPException(status_code=404, detail="No green potions available for sale.")
+        
+        sql_to_update = "UPDATE global_inventory SET gold = gold + 50, num_green_potions = num_green_potions - 1"
+        connection.execute(sqlalchemy.text(sql_to_update))
+    
     return {"total_potions_bought": 1, "total_gold_paid": 50}
+    
