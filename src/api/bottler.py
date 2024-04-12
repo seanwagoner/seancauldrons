@@ -47,12 +47,15 @@ def get_bottle_plan():
     num_green_ml = result[0]
     num_potions = num_green_ml // 100
     
-    return [
-        {
-            "potion_type": [0, 100, 0, 0],
-            "quantity": num_potions,
-        }
-    ]
+    if num_potions:
+        return [
+            {
+                "potion_type": [0, 100, 0, 0],
+                "quantity": num_potions,
+            }
+        ]
+    else:
+        return []
 
 
 if __name__ == "__main__":
