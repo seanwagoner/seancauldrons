@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
 from src import database as db
+import random
 
 # purchase a new small green potion barrel
 # only if num of potions in inventory is < 10
@@ -38,22 +39,29 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
     return "OK"
 
-# Gets called once a day
+import random
+
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
-    """ """
-    sql_to_execute = "SELECT num_green_potions, gold FROM global_inventory"
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_execute)).fetchone()
-    
-    num_green_potions, gold = result
-    
+        print(wholesale_catalog)
+        gold = (connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).fetchone())[0]
+        num_green_potions = (connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).fetchone())[0]
+        num_blue_potions = (connection.execute(sqlalchemy.text("SELECT num_blue_potions FROM global_inventory")).fetchone())[0]
+        num_red_potions = (connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory")).fetchone())[0]
+
     purchase_plan = []
     for barrel in wholesale_catalog:
-        if barrel.potion_type == [0, 1, 0, 0] and num_green_potions < 10 and gold >= barrel.price:
+        if barrel.potion_type == [0, 1, 0, 0] and num_green_potions < 10 and gold >= barrel.price and random.choice([True, False]):
             quantity_to_buy = min((10 - num_green_potions), gold // barrel.price)
             purchase_plan.append({"sku": barrel.sku, "quantity": quantity_to_buy})
-            break
+        elif barrel.potion_type == [1, 0, 0, 0] and num_red_potions < 10 and gold >= barrel.price and random.choice([True, False]):
+            quantity_to_buy = min((10 - num_red_potions), gold // barrel.price)
+            purchase_plan.append({"sku": barrel.sku, "quantity": quantity_to_buy})
+        elif barrel.potion_type == [0, 0, 1, 0] and num_blue_potions < 10 and gold >= barrel.price and random.choice([True, False]):
+            quantity_to_buy = min((10 - num_blue_potions), gold // barrel.price)
+            purchase_plan.append({"sku": barrel.sku, "quantity": quantity_to_buy})
 
     return purchase_plan
+
 

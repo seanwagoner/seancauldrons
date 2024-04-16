@@ -86,11 +86,17 @@ def post_visits(visit_id: int, customers: list[Customer]):
     return "OK"
 
 
+carts = {}
+current_cart_id = 0
+
 @router.post("/")
 def create_cart(new_cart: Customer):
     """ """
-    #don't touch yet
-    return {"cart_id": 1}
+    global current_cart_id
+    current_cart_id += 1
+    cart_id = current_cart_id
+    carts[cart_id] = {} 
+    return {"cart_id": cart_id}
 
 
 class CartItem(BaseModel):
@@ -99,9 +105,14 @@ class CartItem(BaseModel):
 
 @router.post("/{cart_id}/items/{item_sku}")
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
-    #don't touch yet
     """ """
-
+    if cart_id not in carts:
+        raise HTTPException(status_code=404, detail="Cart not found")
+    if cart_item.quantity < 1:
+        if item_sku in carts[cart_id]:
+            del carts[cart_id][item_sku]
+    else:
+        carts[cart_id][item_sku] = cart_item.quantity
     return "OK"
 
 
@@ -111,16 +122,29 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
-    sql_to_fetch = "SELECT num_green_potions FROM global_inventory"
+    if cart_id not in carts:
+        raise HTTPException(status_code=404, detail="Cart not found")
+
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text(sql_to_fetch)).fetchone()
         
-        #Check if there are green potions available for sale
-        if result is None or result[0] <= 0:
-            raise HTTPException(status_code=404, detail="No green potions available for sale.")
+        cart_items = carts[cart_id]
+        total_potions_bought = 0
+
+        for item_sku, quantity in cart_items.items():
+            if item_sku == "GREEN_POTION_0":
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_potions = num_green_potions - :quantity"), {'quantity': quantity})
+            elif item_sku == "BLUE_POTION_0":
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_blue_potions = num_blue_potions - :quantity"), {'quantity': quantity})
+            elif item_sku == "RED_POTION_0":
+                connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_potions = num_red_potions - :quantity"), {'quantity': quantity})
+            total_potions_bought += quantity
         
-        sql_to_update = "UPDATE global_inventory SET gold = gold + 50, num_green_potions = num_green_potions - 1"
-        connection.execute(sqlalchemy.text(sql_to_update))
+        profit = 50 * total_potions_bought
+        
+        connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold + :profit"), {'profit': profit})
+
+        del carts[cart_id]
+        
     
-    return {"total_potions_bought": 1, "total_gold_paid": 50}
+    return {"total_potions_bought": total_potions_bought, "total_gold_paid": profit}
     
