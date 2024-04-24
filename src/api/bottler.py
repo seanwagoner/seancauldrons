@@ -38,24 +38,24 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 new_green_potions += potion.quantity
                 num_green_ml_used += 100 * potion.quantity
                 connection.execute(sqlalchemy.text("UPDATE potions SET inventory = inventory + :new_green_potions WHERE item_sku = 'GREEN_POTION_0'"), {'new_green_potions' : new_green_potions})
-            if potion.potion_type == [100, 0, 0, 0]:
+            elif potion.potion_type == [100, 0, 0, 0]:
                 new_red_potions += potion.quantity
                 num_red_ml_used += 100 * potion.quantity
                 connection.execute(sqlalchemy.text("UPDATE potions SET inventory = inventory + :new_red_potions WHERE item_sku = 'RED_POTION_0'"), {'new_red_potions' : new_red_potions})
-            if potion.potion_type == [0, 0, 100, 0]:
+            elif potion.potion_type == [0, 0, 100, 0]:
                 new_blue_potions += potion.quantity
                 num_blue_ml_used += 100 * potion.quantity
                 connection.execute(sqlalchemy.text("UPDATE potions SET inventory = inventory + :new_blue_potions WHERE item_sku = 'BLUE_POTION_0'"), {'new_blue_potions' : new_blue_potions})
-            if potion.potion_type == [0, 0, 0, 100]:
+            elif potion.potion_type == [0, 0, 0, 100]:
                 new_dark_potions += potion.quantity
                 num_dark_ml_used += 100 * potion.quantity
                 connection.execute(sqlalchemy.text("UPDATE potions SET inventory = inventory + :new_dark_potions WHERE item_sku = 'DARK_POTION_0'"), {'new_dark_potions' : new_dark_potions})
-            if potion.potion_type == [50, 0, 50, 0]: 
+            elif potion.potion_type == [50, 0, 50, 0]: 
                 new_purple_potions += potion.quantity
                 num_blue_ml_used += 50 * potion.quantity
                 num_red_ml_used += 50 * potion.quantity
                 connection.execute(sqlalchemy.text("UPDATE potions SET inventory = inventory + :new_purple_potions WHERE item_sku = 'PURPLE_POTION_0'"), {'new_purple_potions' : new_purple_potions})
-            if potion.potion_type == [50, 50, 0, 0]:
+            elif potion.potion_type == [50, 50, 0, 0]:
                 new_yellow_potions += potion.quantity
                 num_red_ml_used += 50 * potion.quantity
                 num_green_ml_used += 50 * potion.quantity
