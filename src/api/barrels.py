@@ -32,6 +32,9 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
         blue_ml = 0
         dark_ml = 0
 
+        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).fetchone()[0]
+        print(f"initial gold: {gold}")
+
         for barrel_delivered in barrels_delivered:
             gold_paid += barrel_delivered.price * barrel_delivered.quantity
             if barrel_delivered.potion_type == [1, 0, 0, 0]:
@@ -45,7 +48,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             else:
                 raise Exception("Invalid potion type")
         
-        print(f"gold_paid: {gold_paid} red_ml: {red_ml}")
+        print(f"gold_paid: {gold_paid}, red_ml: {red_ml}, green_ml: {green_ml}, blue_ml: {blue_ml}")
 
         connection.execute(sqlalchemy.text(
             """UPDATE global_inventory SET 
@@ -59,6 +62,9 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
               "blue_ml": blue_ml, 
               "dark_ml": dark_ml,
               "gold_paid": gold_paid}])
+        
+        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).fetchone()[0]
+        print(f"updated gold: {gold}")
 
     print(f"barrels delivered: {barrels_delivered} order_id: {order_id}")
 
@@ -129,6 +135,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 purchase_plan.append(barrel_purchase)
                 gold -= price * barrel_purchase['quantity']
                 current_ml += ml_per_barrel * barrel_purchase['quantity']
+
+    
 
     return purchase_plan
 

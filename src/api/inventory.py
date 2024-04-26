@@ -12,20 +12,24 @@ router = APIRouter(
 )
 
 @router.get("/audit")
+@router.get("/audit")
 def get_inventory():
-    """Fetches gold inventory"""
+    """Fetches inventory details including gold, milliliters in barrels, and number of potions."""
     with db.engine.begin() as connection:
-        gold = (connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).fetchone())[0]
-        green_ml = (connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).fetchone())[0]
-        blue_ml = (connection.execute(sqlalchemy.text("SELECT num_blue_ml FROM global_inventory")).fetchone())[0]
-        red_ml = (connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).fetchone())[0]
-        dark_ml = (connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).fetchone())[0]
-        num_potions = (connection.execute(sqlalchemy.text("SELECT num_potions FROM global_inventory")).fetchone())[0]
+        result = connection.execute(sqlalchemy.text("""
+            SELECT gold, num_green_ml, num_blue_ml, num_red_ml, num_dark_ml, num_potions 
+            FROM global_inventory
+        """)).fetchone()
         
+
+        gold, green_ml, blue_ml, red_ml, dark_ml, num_potions = result
+
         ml_in_barrels = green_ml + blue_ml + red_ml + dark_ml
-        
+
+    print(f"num_potions: {num_potions}, ml_in_barrels: {ml_in_barrels}, gold: {gold}\n")
     
     return {"number_of_potions": num_potions, "ml_in_barrels": ml_in_barrels, "gold": gold}
+
 
 
 # Gets called once a day
