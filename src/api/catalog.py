@@ -18,18 +18,20 @@ def get_catalog():
                 WHERE inventory > 0
                 """
             )).fetchall()
+    
 
     catalog = []
     for row in result:
-        potion_type = [row['red'], row['green'], row['blue'], row['dark']]
+        potion_type = [row[3], row[4], row[5], row[6]]
 
         catalog.append({
-            "sku": row['item_sku'],
-            "name": row['item_sku'].split('_')[0].lower() + " potion",
-            "quantity": row['inventory'],
-            "price": row['price'],
+            "sku": row[0], 
+            "name": row[0].split('_')[0].lower() + " potion",  
+            "quantity": row[1],  
+            "price": row[2],  
             "potion_type": potion_type
         })
+    
 
     return catalog
     
