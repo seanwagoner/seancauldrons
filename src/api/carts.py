@@ -81,7 +81,12 @@ def post_visits(visit_id: int, customers: list[Customer]):
     """
     Which customers visited the shop today?
     """
-    print(customers)
+    with db.engine.begin() as connection:
+        for customer in customers:
+            connection.execute(sqlalchemy.text(
+                "INSERT INTO customers (name, class, level) VALUES (:name, :class, :level)"
+            ), {'name': customer.customer_name, 'class': customer.character_class, 'level': customer.level})
+
 
     return "OK"
 
@@ -105,16 +110,21 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         if not cart_exists:
             raise HTTPException(status_code=404, detail="Cart not found")
         
+        potion_id = connection.execute(sqlalchemy.text(
+            "SELECT id FROM potions WHERE item_sku = :item_sku"
+        ), {'item_sku': item_sku}).fetchone()[0]
+
         item_exists = connection.execute(sqlalchemy.text(
-            "SELECT 1 FROM cart_items WHERE cart_id = :cart_id AND item_sku = :item_sku"
-        ), {'cart_id': cart_id, 'item_sku': item_sku}).scalar()
+            "SELECT 1 FROM cart_items WHERE cart_id = :cart_id AND potion_id = :potion_id"
+        ), {'cart_id': cart_id, 'potion_id': potion_id}).scalar()
 
         if item_exists:
             raise HTTPException(status_code=400, detail="Item already exists in the cart")
 
         connection.execute(sqlalchemy.text(
-            "INSERT INTO cart_items (cart_id, item_sku, quantity) VALUES (:cart_id, :item_sku, :quantity)"
-        ), {'cart_id': cart_id, 'item_sku': item_sku, 'quantity': cart_item.quantity})
+            "INSERT INTO cart_items (cart_id, potion_id, quantity) VALUES (:cart_id, :potion_id, :quantity)"
+        ), {'cart_id': cart_id, 'potion_id': potion_id, 'quantity': cart_item.quantity})
+
     
     return "OK"
 
@@ -124,41 +134,38 @@ class CartCheckout(BaseModel):
 
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
-    """ """
     with db.engine.begin() as connection:
         cart_items = connection.execute(sqlalchemy.text(
-                "SELECT item_sku, quantity FROM cart_items WHERE cart_id = :cart_id"
-            ), {'cart_id': cart_id}).fetchall()
+            "SELECT potion_id, quantity FROM cart_items WHERE cart_id = :cart_id"
+        ), {'cart_id': cart_id}).fetchall()
         
         total_potions_bought = 0
 
         for item in cart_items:
-            item_sku = item[0]
+            potion_id = item[0]
             quantity = item[1]
 
             connection.execute(sqlalchemy.text(
-                    "UPDATE potions SET inventory = inventory - :quantity WHERE item_sku = :item_sku AND inventory >= :quantity"
-                ), {'quantity': quantity, 'item_sku': item_sku})
+                "UPDATE potions SET inventory = inventory - :quantity WHERE id = :potion_id AND inventory >= :quantity"
+            ), {'quantity': quantity, 'potion_id': potion_id})
 
             total_potions_bought += quantity
-       
+
         profit = 50 * total_potions_bought
 
-        #update globals
-        connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold + :profit, num_potions = num_potions - :total_potions_bought"),
-                            {'profit': profit, 'total_potions_bought' : total_potions_bought})
 
-        #remove cart items
         connection.execute(sqlalchemy.text(
-                "DELETE FROM cart_items WHERE cart_id = :cart_id"
-            ), {'cart_id': cart_id})
-        
-        #delete cart from db
+            "UPDATE global_inventory SET gold = gold + :profit, num_potions = num_potions - :total_potions_bought"
+        ), {'profit': profit, 'total_potions_bought': total_potions_bought})
+
         connection.execute(sqlalchemy.text(
-                "DELETE FROM carts WHERE id = :cart_id"
-            ), {'cart_id': cart_id})
+            "DELETE FROM cart_items WHERE cart_id = :cart_id"
+        ), {'cart_id': cart_id})
         
-        
+        connection.execute(sqlalchemy.text(
+            "DELETE FROM carts WHERE id = :cart_id"
+        ), {'cart_id': cart_id})
     
     return {"total_potions_bought": total_potions_bought, "total_gold_paid": profit}
+
     
