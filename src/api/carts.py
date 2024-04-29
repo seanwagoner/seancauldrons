@@ -166,6 +166,8 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             "DELETE FROM carts WHERE id = :cart_id"
         ), {'cart_id': cart_id})
     
+    print({"total_potions_bought": total_potions_bought, "total_gold_paid": profit})
+    
     return {"total_potions_bought": total_potions_bought, "total_gold_paid": profit}
 
     
