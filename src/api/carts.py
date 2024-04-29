@@ -145,6 +145,9 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
             potion_id = item[0]
             quantity = item[1]
 
+            print(potion_id)
+            print(quantity)
+
             connection.execute(sqlalchemy.text(
                 "UPDATE potions SET inventory = inventory - :quantity WHERE id = :potion_id AND inventory >= :quantity"
             ), {'quantity': quantity, 'potion_id': potion_id})
