@@ -13,24 +13,26 @@ def get_catalog():
     with db.engine.connect() as connection:
         result = connection.execute(sqlalchemy.text(
                 """
-                SELECT item_sku, inventory, price, red, green, blue, dark
-                FROM potions 
-                WHERE inventory > 0
+                SELECT p.item_sku, COALESCE(SUM(sle.change), 0) AS inventory, p.price, p.red, p.green, p.blue, p.dark
+                FROM potions p
+                LEFT JOIN supply_ledger_entries sle ON p.supply_id = sle.supply_id
+                GROUP BY p.item_sku, p.price, p.red, p.green, p.blue, p.dark
                 """
             )).fetchall()
     
 
     catalog = []
-    for row in result:
-        potion_type = [row[3], row[4], row[5], row[6]]
+    for column in result:
+        potion_type = [column[3], column[4], column[5], column[6]]
 
-        catalog.append({
-            "sku": row[0], 
-            "name": row[0].split('_')[0].lower() + " potion",  
-            "quantity": row[1],  
-            "price": row[2],  
-            "potion_type": potion_type
-        })
+        if column[1] > 0:
+            catalog.append({
+                "sku": column[0], 
+                "name": column[0].split('_')[0].lower() + " potion",  
+                "quantity": column[1],
+                "price": column[2],  
+                "potion_type": potion_type
+            })
     
 
     return catalog

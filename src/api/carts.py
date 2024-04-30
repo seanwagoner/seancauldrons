@@ -114,13 +114,6 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
             "SELECT id FROM potions WHERE item_sku = :item_sku"
         ), {'item_sku': item_sku}).fetchone()[0]
 
-        item_exists = connection.execute(sqlalchemy.text(
-            "SELECT 1 FROM cart_items WHERE cart_id = :cart_id AND potion_id = :potion_id"
-        ), {'cart_id': cart_id, 'potion_id': potion_id}).scalar()
-
-        if item_exists:
-            raise HTTPException(status_code=400, detail="Item already exists in the cart")
-
         connection.execute(sqlalchemy.text(
             "INSERT INTO cart_items (cart_id, potion_id, quantity) VALUES (:cart_id, :potion_id, :quantity)"
         ), {'cart_id': cart_id, 'potion_id': potion_id, 'quantity': cart_item.quantity})
@@ -135,31 +128,45 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     with db.engine.begin() as connection:
+        profit = 0
+        total_potions_bought = 0
         cart_items = connection.execute(sqlalchemy.text(
-            "SELECT potion_id, quantity FROM cart_items WHERE cart_id = :cart_id"
+            """SELECT ci.potion_id, ci.quantity, p.supply_id, p.price
+            FROM cart_items ci
+            JOIN potions p ON ci.potion_id = p.id
+            WHERE ci.cart_id = :cart_id
+            """
         ), {'cart_id': cart_id}).fetchall()
         
-        total_potions_bought = 0
+        transaction_id = connection.execute(sqlalchemy.text("""INSERT INTO supply_transactions (description) 
+                                                            VALUES ('Customer of cart_id :cart_id purchased potions.')
+                                                            RETURNING id
+                                                            """), {"cart_id" : cart_id}).scalar()
 
         for item in cart_items:
             potion_id = item[0]
             quantity = item[1]
+            supply_id = item[2]
+            price = item[3]
 
-            print(potion_id)
-            print(quantity)
+            print(f"Potion ID: {potion_id}, Quantity: {quantity}, Supply ID: {supply_id}, Price: {price}")
 
             connection.execute(sqlalchemy.text(
-                "UPDATE potions SET inventory = inventory - :quantity WHERE id = :potion_id AND inventory >= :quantity"
-            ), {'quantity': quantity, 'potion_id': potion_id})
+                """INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                VALUES (:supply_id, :transaction_id, :change)
+                """
+            ), {'supply_id': supply_id, 'transaction_id': transaction_id, 'change': -quantity})
+
+            profit += price * quantity
 
             total_potions_bought += quantity
-
-        profit = 50 * total_potions_bought
-
-
-        connection.execute(sqlalchemy.text(
-            "UPDATE global_inventory SET gold = gold + :profit, num_potions = num_potions - :total_potions_bought"
-        ), {'profit': profit, 'total_potions_bought': total_potions_bought})
+        
+        connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                            VALUES
+                            (:gold_id, :transaction_id, :gold_paid)
+                            """), 
+                            {"gold_id" : 1, "transaction_id": transaction_id, "gold_paid" : profit},
+                            )
 
         connection.execute(sqlalchemy.text(
             "DELETE FROM cart_items WHERE cart_id = :cart_id"
