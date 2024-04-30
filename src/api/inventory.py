@@ -16,13 +16,31 @@ router = APIRouter(
 def get_inventory():
     """Fetches inventory details including gold, milliliters in barrels, and number of potions."""
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("""
-            SELECT gold, num_green_ml, num_blue_ml, num_red_ml, num_dark_ml, num_potions 
-            FROM global_inventory
-        """)).fetchone()
+        gold = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 1}).scalar()
+        red_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 2}).scalar()
+        green_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 3}).scalar()
+        blue_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 4}).scalar()
+        dark_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 5}).scalar()  
         
+        red_potion = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 7}).scalar()  
+        green_potion = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 8}).scalar()  
+        blue_potion = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 9}).scalar()  
+        dark_potion = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 10}).scalar()  
+        purple_potion = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 11}).scalar()  
+        yellow_potion = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 12}).scalar()  
 
-        gold, green_ml, blue_ml, red_ml, dark_ml, num_potions = result
+        num_potions = red_potion + green_potion + blue_potion + dark_potion + purple_potion + yellow_potion
 
         ml_in_barrels = green_ml + blue_ml + red_ml + dark_ml
 
@@ -40,11 +58,9 @@ def get_capacity_plan():
     capacity unit costs 1000 gold.
     """
 
-
     with db.engine.begin() as connection:
-        gold = connection.execute(sqlalchemy.text("""
-            SELECT gold from global_inventory
-            """)).fetchone()[0]
+        gold = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 1}).scalar()
         curr_ml_capacity = connection.execute(sqlalchemy.text("""
             SELECT ml_capacity from global_inventory
             """)).fetchone()[0] // 10000
@@ -56,13 +72,13 @@ def get_capacity_plan():
         ml_capacity = 0
         
         if gold >= 2100:
-            potion_capacity = 1
-            ml_capacity = 1
+            potion_capacity += 1
+            ml_capacity += 1
         elif gold >= 1100:
             if curr_ml_capacity >= curr_potion_capacity:
-                potion_capacity = 1
+                potion_capacity += 1
             else:
-                ml_capacity = 1
+                ml_capacity += 1
         
 
     return {
@@ -81,19 +97,31 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
     Start with 1 capacity for 50 potions and 1 capacity for 10000 ml of potion. Each additional 
     capacity unit costs 1000 gold.
     """
-
-    gold_spent = 1000 * capacity_purchase.ml_capacity + capacity_purchase.potion_capacity
-    new_potion_capacity = capacity_purchase.potion_capacity * 50
-    new_ml_capacity = capacity_purchase.ml_capacity * 10000
-
     with db.engine.begin() as connection:
-        connection.execute(sqlalchemy.text("""
-                                           UPDATE global_inventory SET 
-                                           gold = gold - :gold_spent, 
-                                           ml_capacity = ml_capacity + :new_ml_capacity,
-                                           potion_capacity = potion_capacity + new_potion_capacity"""), 
-                                           {"gold_spent" : gold_spent},
-                                           {"new_ml_capacity" : new_ml_capacity},
-                                           {"new_potion_capacity" : new_potion_capacity})
+        if capacity_purchase.potion_capacity or capacity_purchase.ml_capacity:
+            gold_spent = (1000 * capacity_purchase.ml_capacity + capacity_purchase.potion_capacity)
+            new_potion_capacity = capacity_purchase.potion_capacity * 50
+            new_ml_capacity = capacity_purchase.ml_capacity * 10000
+            print(gold_spent)
+            transaction_id = connection.execute(sqlalchemy.text("""INSERT INTO supply_transactions (description) 
+                                                            VALUES ('Purchased capacity upgrade.')
+                                                            RETURNING id
+                                                            """)).scalar()
+            print(transaction_id)
+            connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                    VALUES (:gold_id, :transaction_id, :gold_spent)"""), 
+                                                   {"gold_id" : 1, "transaction_id": transaction_id, "gold_spent" : gold_spent})
+            connection.execute(sqlalchemy.text("""
+                                                UPDATE global_inventory SET 
+                                                ml_capacity = ml_capacity + :new_ml_capacity,
+                                           potion_capacity = potion_capacity + :new_potion_capacity"""), 
+                                           {"gold_spent" : gold_spent,
+                                           "new_ml_capacity" : new_ml_capacity,
+                                           "new_potion_capacity" : new_potion_capacity})
+    
+
+    print("new potion cap: ", new_potion_capacity)
+    print("new ml cap: ", new_ml_capacity)
+
 
     return "OK"
