@@ -28,6 +28,15 @@ def reset():
 
 
     with db.engine.begin() as connection:
+        transaction_id = connection.execute(sqlalchemy.text("""INSERT INTO supply_transactions (description) 
+                                                            VALUES ('Started with 100 gold.')
+                                                            RETURNING id
+                                                            """)).scalar()
+        connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:gold_id, :transaction_id, :change)"""), 
+                                                   {"gold_id" : 1, "transaction_id": transaction_id, "change" : 100})
+
+
         connection.execute(sqlalchemy.text(global_reset))
         connection.execute(sqlalchemy.text(cart_items_reset))
         connection.execute(sqlalchemy.text(carts_reset))
