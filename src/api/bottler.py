@@ -179,19 +179,19 @@ def get_bottle_plan():
         
         
         if potion_amounts["red"] > 0:
-            result.append({"potion_type": "RED_POTION_0", "quantity": potion_amounts["red"]})
+            result.append({"potion_type": potion_requirements["RED_POTION_0"], "quantity": potion_amounts["red"]})
         if potion_amounts["green"] > 0:
-            result.append({"potion_type": "GREEN_POTION_0", "quantity": potion_amounts["green"]})
+            result.append({"potion_type": potion_requirements["GREEN_POTION_0"], "quantity": potion_amounts["green"]})
         if potion_amounts["blue"] > 0:
-            result.append({"potion_type": "BLUE_POTION_0", "quantity": potion_amounts["blue"]})
+            result.append({"potion_type": potion_requirements["BLUE_POTION_0"], "quantity": potion_amounts["blue"]})
         if potion_amounts["dark"] > 0:
-            result.append({"potion_type": "DARK_POTION_0", "quantity": potion_amounts["dark"]})
+            result.append({"potion_type": potion_requirements["DARK_POTION_0"], "quantity": potion_amounts["dark"]})
         if potion_amounts["purple"] > 0:
-            result.append({"potion_type": "PURPLE_POTION_0", "quantity": potion_amounts["purple"]})
+            result.append({"potion_type": potion_requirements["PURPLE_POTION_0"], "quantity": potion_amounts["purple"]})
         if potion_amounts["yellow"] > 0:
-            result.append({"potion_type": "YELLOW_POTION_0", "quantity": potion_amounts["yellow"]})
+            result.append({"potion_type": potion_requirements["YELLOW_POTION_0"], "quantity": potion_amounts["yellow"]})
 
-
+    print(result)
     return result
 
 
