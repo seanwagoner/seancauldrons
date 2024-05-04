@@ -95,7 +95,7 @@ def calculate_barrel_to_purchase(catalog, gold, type, ml):
                     max_effectiveness = effectiveness
                     best_option = {
                         'sku': barrel.sku,
-                        'quantity': max_quantity,
+                        'quantity': int(max_quantity),
                         'total_ml': barrel.ml_per_barrel * max_quantity,
                         'total_cost': barrel.price * max_quantity
                     }
@@ -140,10 +140,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     for i, ml in enumerate(ml_inventory):
         if ml < threshold:
             potion_type = [int(j == i) for j in range(4)]
-            barrel_purchase = calculate_barrel_to_purchase(wholesale_catalog, gold/4 if gold > 300 else gold, potion_type, MAX_ML - current_ml)
+            barrel_purchase = calculate_barrel_to_purchase(wholesale_catalog, gold // 4 if gold > 300 else gold, potion_type, MAX_ML - current_ml)
             if barrel_purchase:
                 price = next(item.price for item in wholesale_catalog if item.sku == barrel_purchase['sku'])
-                ml_per_barrel = next(item.ml_per_barrel for item in wholesale_catalog)
+                ml_per_barrel = next(item.ml_per_barrel for item in wholesale_catalog if item.sku == barrel_purchase['sku'])
                 purchase_plan.append(barrel_purchase)
                 gold -= price * barrel_purchase['quantity']
                 current_ml += ml_per_barrel * barrel_purchase['quantity']
