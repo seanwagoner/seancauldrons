@@ -24,7 +24,6 @@ class search_sort_order(str, Enum):
 
 @router.get("/search/", tags=["search"])
 def search_orders(
-    #don't do this yet
     customer_name: str = "",
     potion_sku: str = "",
     search_page: str = "",
@@ -56,18 +55,60 @@ def search_orders(
     time is 5 total line items.
     """
 
+    items_per_page = 5
+    offset = search_page * items_per_page
+
+    columns = [
+        db.cart_items.c.id.label("line_item_id"),
+        db.potions.c.item_sku,
+        db.customers.c.name.label("customer_name"),
+        (db.cart_items.c.quantity * db.potions.c.price).label("line_item_total"),
+        db.cart_items.c.timestamp
+    ]
+
+    stmt = sqlalchemy.select(columns).select_from(
+        db.cart_items
+        .join(db.carts, db.cart_items.c.cart_id == db.carts.c.id)
+        .join(db.customers, db.carts.c.customer_id == db.customers.c.id)
+        .join(db.potions, db.cart_items.c.potion_id == db.potions.c.id)
+    )
+
+    if customer_name:
+        stmt = stmt.where(db.customers.c.name.ilike(f"%{customer_name.lower()}%"))
+    if potion_sku:
+        stmt = stmt.where(db.potions.c.item_sku.ilike(f"%{potion_sku.lower()}%"))
+
+    if sort_col == search_sort_options.customer_name:
+        order_by = db.customers.c.name
+    elif sort_col == search_sort_options.item_sku:
+        order_by = db.potions.c.item_sku
+    elif sort_col == search_sort_options.line_item_total:
+        order_by = (db.cart_items.c.quantity * db.potions.c.price)
+    else:
+        order_by = db.cart_items.c.timestamp
+    if sort_order == search_sort_order.desc:
+        order_by = sqlalchemy.desc(order_by)
+
+    stmt = stmt.order_by(order_by, db.cart_items.c.id).limit(items_per_page).offset(offset)
+
+    with db.engine.connect() as conn:
+        results = conn.execute(stmt).fetchall()
+
+    formatted_results = [{
+        "line_item_id": row.line_item_id,
+        "item_sku": row.item_sku,
+        "customer_name": row.customer_name,
+        "line_item_total": row.line_item_total,
+        "timestamp": row.timestamp.isoformat(),
+    } for row in results]
+
+    previous_page = search_page - 1 if search_page > 0 else None
+    next_page = search_page + 1 if len(results) == items_per_page else None
+
     return {
-        "previous": "",
-        "next": "",
-        "results": [
-            {
-                "line_item_id": 1,
-                "item_sku": "1 oblivion potion",
-                "customer_name": "Scaramouche",
-                "line_item_total": 50,
-                "timestamp": "2021-01-01T00:00:00Z",
-            }
-        ],
+        "previous": previous_page,
+        "next": next_page,
+        "results": formatted_results
     }
 
 
