@@ -26,7 +26,7 @@ class search_sort_order(str, Enum):
 def search_orders(
     customer_name: str = "",
     potion_sku: str = "",
-    search_page: str = "",
+    search_page: int = 0,
     sort_col: search_sort_options = search_sort_options.timestamp,
     sort_order: search_sort_order = search_sort_order.desc,
 ):
@@ -61,7 +61,7 @@ def search_orders(
     columns = [
         db.cart_items.c.id.label("line_item_id"),
         db.potions.c.item_sku,
-        db.customers.c.name.label("customer_name"),
+        db.carts.c.customer_name,
         (db.cart_items.c.quantity * db.potions.c.price).label("line_item_total"),
         db.cart_items.c.timestamp
     ]
@@ -69,17 +69,16 @@ def search_orders(
     stmt = sqlalchemy.select(columns).select_from(
         db.cart_items
         .join(db.carts, db.cart_items.c.cart_id == db.carts.c.id)
-        .join(db.customers, db.carts.c.customer_id == db.customers.c.id)
         .join(db.potions, db.cart_items.c.potion_id == db.potions.c.id)
     )
 
     if customer_name:
-        stmt = stmt.where(db.customers.c.name.ilike(f"%{customer_name.lower()}%"))
+        stmt = stmt.where(db.carts.c.customer_name.ilike(f"%{customer_name.lower()}%"))
     if potion_sku:
         stmt = stmt.where(db.potions.c.item_sku.ilike(f"%{potion_sku.lower()}%"))
 
     if sort_col == search_sort_options.customer_name:
-        order_by = db.customers.c.name
+        order_by = db.carts.c.customer_name
     elif sort_col == search_sort_options.item_sku:
         order_by = db.potions.c.item_sku
     elif sort_col == search_sort_options.line_item_total:
@@ -132,10 +131,15 @@ def post_visits(visit_id: int, customers: list[Customer]):
     return "OK"
 
 @router.post("/")
-def create_cart():
+def create_cart(new_cart: Customer):
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text("INSERT INTO carts DEFAULT VALUES RETURNING id"))
+        result = connection.execute(sqlalchemy.text("""INSERT INTO carts (customer_name, character_class, level) 
+                                                    VALUES (:name, :class, :level) RETURNING id """), 
+                                                     {"name" : new_cart.customer_name, 
+                                                      "class" : new_cart.character_class, 
+                                                      "level" : new_cart.level})
         cart_id = result.fetchone()[0]
+
     return {"cart_id": cart_id}
 
 
