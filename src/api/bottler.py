@@ -157,6 +157,9 @@ def get_bottle_plan():
         yellow_potions = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :supply_id"""), {"supply_id" : 12}).scalar()
         
+        print(f"current red potions: {red_potions}, current blue_potions: {blue_potions}, current green_potions: {green_potions}")
+        print(f"red_ml: {num_red_ml}, blue_ml: {num_blue_ml}, green_ml: {num_green_ml}")
+
         potion_limit = connection.execute(sqlalchemy.text("""SELECT potion_capacity FROM global_inventory""")).fetchone()[0]
 
         if num_red_ml >= 100 and red_potions < 10:
@@ -165,14 +168,15 @@ def get_bottle_plan():
                 potion_amounts["red"] = additional_red
                 current_total_potions += additional_red
                 num_red_ml -= additional_red * 100
-        elif red_potions > 10 and num_red_ml >= 50 and num_blue_ml >= 50 and purple_potions < 10 and blue_potions < 10:
+                red_potions += additional_red
+        elif red_potions >= 10 and num_red_ml >= 50 and num_blue_ml >= 50 and purple_potions < 10 and blue_potions < 10:
             additional_purple = min(num_red_ml // 50, num_blue_ml // 50, 10 - max(purple_potions, blue_potions), potion_limit - current_total_potions)
             if current_total_potions + additional_purple <= potion_limit:
                 potion_amounts["purple"] = additional_purple
                 current_total_potions += additional_purple
                 num_red_ml -= additional_purple * 50
                 num_blue_ml -= additional_purple * 50
-        elif red_potions > 10 and num_red_ml >= 50 and num_green_ml >= 50 and yellow_potions < 10 and green_potions < 10:
+        elif red_potions >= 10 and num_red_ml >= 50 and num_green_ml >= 50 and yellow_potions < 10 and green_potions < 10:
             additional_yellow = min(num_red_ml // 50, num_green_ml // 50, 10 - max(yellow_potions, green_potions), potion_limit - current_total_potions)
             if current_total_potions + additional_yellow <= potion_limit:
                 potion_amounts["yellow"] = additional_yellow
@@ -197,24 +201,20 @@ def get_bottle_plan():
                 potion_amounts["dark"] = additional_dark
                 current_total_potions += additional_dark
                 num_dark_ml -= additional_dark * 100
+        
+        print(f"red_ml after: {num_red_ml}, blue_ml: {num_blue_ml}, green_ml: {num_green_ml}")
 
         if potion_amounts["red"] > 0:
-            result.append({"potion_type": "RED_POTION_0", "quantity": potion_amounts["red"]})
             result.append({"potion_type": potion_requirements["RED_POTION_0"], "quantity": potion_amounts["red"]})
         if potion_amounts["green"] > 0:
-            result.append({"potion_type": "GREEN_POTION_0", "quantity": potion_amounts["green"]})
             result.append({"potion_type": potion_requirements["GREEN_POTION_0"], "quantity": potion_amounts["green"]})
         if potion_amounts["blue"] > 0:
-            result.append({"potion_type": "BLUE_POTION_0", "quantity": potion_amounts["blue"]})
             result.append({"potion_type": potion_requirements["BLUE_POTION_0"], "quantity": potion_amounts["blue"]})
         if potion_amounts["dark"] > 0:
-            result.append({"potion_type": "DARK_POTION_0", "quantity": potion_amounts["dark"]})
             result.append({"potion_type": potion_requirements["DARK_POTION_0"], "quantity": potion_amounts["dark"]})
         if potion_amounts["purple"] > 0:
-            result.append({"potion_type": "PURPLE_POTION_0", "quantity": potion_amounts["purple"]})
             result.append({"potion_type": potion_requirements["PURPLE_POTION_0"], "quantity": potion_amounts["purple"]})
         if potion_amounts["yellow"] > 0:
-            result.append({"potion_type": "YELLOW_POTION_0", "quantity": potion_amounts["yellow"]})
             result.append({"potion_type": potion_requirements["YELLOW_POTION_0"], "quantity": potion_amounts["yellow"]})
 
     print(result)
