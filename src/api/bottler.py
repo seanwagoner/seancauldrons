@@ -168,6 +168,7 @@ def get_bottle_plan():
         new_blue_potions = 0
         new_purple_potions = 0
         new_yellow_potions = 0
+        new_dark_potions = 0
 
         while current_potions < potion_limit:
             if num_red_ml > 100:
@@ -181,6 +182,10 @@ def get_bottle_plan():
             if num_blue_ml > 100:
                 new_blue_potions += 1
                 num_blue_ml -= 100
+                current_potions += 1
+            if num_dark_ml > 100:
+                new_dark_potions += 1
+                num_dark_ml -= 100
                 current_potions += 1
             if num_blue_ml > 50 and num_red_ml > 50:
                 new_purple_potions += 1
@@ -212,7 +217,8 @@ def get_bottle_plan():
             result.append({"potion_type": potion_requirements["PURPLE_POTION_0"], "quantity": new_yellow_potions})
         if new_purple_potions > 0:
             result.append({"potion_type": potion_requirements["YELLOW_POTION_0"], "quantity": new_purple_potions})
-
+        if new_dark_potions > 0:
+            result.append({"potion_type": potion_requirements["YELLOW_POTION_0"], "quantity": new_dark_potions})
     print(result)
     return result
 
