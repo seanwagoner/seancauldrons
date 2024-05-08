@@ -166,13 +166,19 @@ def get_bottle_plan():
                 current_total_potions += additional_red
                 num_red_ml -= additional_red * 100
         elif red_potions > 10 and num_red_ml >= 50 and num_blue_ml >= 50 and purple_potions < 10 and blue_potions < 10:
-            potion_amounts["purple"] = min(num_red_ml // 50, num_blue_ml // 50)
-            num_blue_ml -= potion_amounts["purple"] * 50
-            num_red_ml -= potion_amounts["purple"] * 50
+            additional_purple = min(num_red_ml // 50, num_blue_ml // 50, 10 - max(purple_potions, blue_potions), potion_limit - current_total_potions)
+            if current_total_potions + additional_purple <= potion_limit:
+                potion_amounts["purple"] = additional_purple
+                current_total_potions += additional_purple
+                num_red_ml -= additional_purple * 50
+                num_blue_ml -= additional_purple * 50
         elif red_potions > 10 and num_red_ml >= 50 and num_green_ml >= 50 and yellow_potions < 10 and green_potions < 10:
-            potion_amounts["yellow"] = min(num_red_ml // 50, num_green_ml // 50)
-            num_green_ml -= potion_amounts["yellow"] * 50
-            num_red_ml -= potion_amounts["yellow"] * 50
+            additional_yellow = min(num_red_ml // 50, num_green_ml // 50, 10 - max(yellow_potions, green_potions), potion_limit - current_total_potions)
+            if current_total_potions + additional_yellow <= potion_limit:
+                potion_amounts["yellow"] = additional_yellow
+                current_total_potions += additional_yellow
+                num_red_ml -= additional_yellow * 50
+                num_green_ml -= additional_yellow * 50
         
         if num_green_ml >= 100 and green_potions < 10:
             additional_green = min(num_green_ml // 100, 10 - green_potions)
