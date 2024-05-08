@@ -55,18 +55,15 @@ def search_orders(
     time is 5 total line items.
     """
 
-    items_per_page = 5
-    offset = search_page * items_per_page
+    offset = search_page * 5
 
-    columns = [
-        db.cart_items.c.id.label("line_item_id"),
+    stmt = sqlalchemy.select(
+        db.cart_items.c.item_id.label("line_item_id"),
         db.potions.c.item_sku,
         db.carts.c.customer_name,
         (db.cart_items.c.quantity * db.potions.c.price).label("line_item_total"),
-        db.cart_items.c.timestamp
-    ]
-
-    stmt = sqlalchemy.select(columns).select_from(
+        db.cart_items.c.created_at
+        ).select_from(
         db.cart_items
         .join(db.carts, db.cart_items.c.cart_id == db.carts.c.id)
         .join(db.potions, db.cart_items.c.potion_id == db.potions.c.id)
@@ -84,11 +81,11 @@ def search_orders(
     elif sort_col == search_sort_options.line_item_total:
         order_by = (db.cart_items.c.quantity * db.potions.c.price)
     else:
-        order_by = db.cart_items.c.timestamp
+        order_by = db.cart_items.c.created_at
     if sort_order == search_sort_order.desc:
         order_by = sqlalchemy.desc(order_by)
 
-    stmt = stmt.order_by(order_by, db.cart_items.c.id).limit(items_per_page).offset(offset)
+    stmt = stmt.order_by(order_by, db.cart_items.c.item_id).limit(5).offset(offset)
 
     with db.engine.connect() as conn:
         results = conn.execute(stmt).fetchall()
@@ -98,15 +95,12 @@ def search_orders(
         "item_sku": row.item_sku,
         "customer_name": row.customer_name,
         "line_item_total": row.line_item_total,
-        "timestamp": row.timestamp.isoformat(),
+        "timestamp": row.created_at.isoformat(),
     } for row in results]
 
-    previous_page = search_page - 1 if search_page > 0 else None
-    next_page = search_page + 1 if len(results) == items_per_page else None
-
     return {
-        "previous": previous_page,
-        "next": next_page,
+        "previous": search_page - 1 if search_page > 0 else None,
+        "next": search_page + 1 if len(results) == 5 else None,
         "results": formatted_results
     }
 
