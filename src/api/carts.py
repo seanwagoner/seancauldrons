@@ -98,8 +98,10 @@ def search_orders(
         "timestamp": row.created_at.isoformat(),
     } for row in results]
 
+
+
     return {
-        "previous": search_page - 1 if search_page > 0 else None,
+        "previous": search_page - 1 if offset > 0 else None,
         "next": search_page + 1 if len(results) == 5 else None,
         "results": formatted_results
     }
