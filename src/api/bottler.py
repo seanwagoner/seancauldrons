@@ -162,60 +162,56 @@ def get_bottle_plan():
 
         potion_limit = connection.execute(sqlalchemy.text("""SELECT potion_capacity FROM global_inventory""")).fetchone()[0]
 
-        if num_red_ml >= 100 and red_potions < 10:
-            additional_red = min(num_red_ml // 100, 10 - red_potions)
-            if current_total_potions + additional_red <= potion_limit:
-                potion_amounts["red"] = additional_red
-                current_total_potions += additional_red
-                num_red_ml -= additional_red * 100
-                red_potions += additional_red
-        elif red_potions >= 10 and num_red_ml >= 50 and num_blue_ml >= 50 and purple_potions < 10 and blue_potions < 10:
-            additional_purple = min(num_red_ml // 50, num_blue_ml // 50, 10 - max(purple_potions, blue_potions), potion_limit - current_total_potions)
-            if current_total_potions + additional_purple <= potion_limit:
-                potion_amounts["purple"] = additional_purple
-                current_total_potions += additional_purple
-                num_red_ml -= additional_purple * 50
-                num_blue_ml -= additional_purple * 50
-        elif red_potions >= 10 and num_red_ml >= 50 and num_green_ml >= 50 and yellow_potions < 10 and green_potions < 10:
-            additional_yellow = min(num_red_ml // 50, num_green_ml // 50, 10 - max(yellow_potions, green_potions), potion_limit - current_total_potions)
-            if current_total_potions + additional_yellow <= potion_limit:
-                potion_amounts["yellow"] = additional_yellow
-                current_total_potions += additional_yellow
-                num_red_ml -= additional_yellow * 50
-                num_green_ml -= additional_yellow * 50
-        if num_green_ml >= 100 and green_potions < 10:
-            additional_green = min(num_green_ml // 100, 10 - green_potions)
-            if current_total_potions + additional_green <= potion_limit:
-                potion_amounts["green"] = additional_green
-                current_total_potions += additional_green
-                num_green_ml -= additional_green * 100
-        if num_blue_ml >= 100 and blue_potions < 10:
-            additional_blue = min(num_blue_ml // 100, 10 - blue_potions)
-            if current_total_potions + additional_blue <= potion_limit:
-                potion_amounts["blue"] = additional_blue
-                current_total_potions += additional_blue
-                num_blue_ml -= additional_blue * 100
-        if num_dark_ml >= 100 and dark_potions < 10:
-            additional_dark = min(num_dark_ml // 100, 10 - dark_potions)
-            if current_total_potions + additional_dark <= potion_limit:
-                potion_amounts["dark"] = additional_dark
-                current_total_potions += additional_dark
-                num_dark_ml -= additional_dark * 100
+        current_potions = red_potions + green_potions + blue_potions + dark_potions + purple_potions + yellow_potions
+        new_red_potions = 0
+        new_green_potions = 0
+        new_blue_potions = 0
+        new_purple_potions = 0
+        new_yellow_potions = 0
+
+        while current_potions < potion_limit:
+            if num_red_ml > 100:
+                new_red_potions += 1
+                num_red_ml -= 100
+                current_potions += 1
+            if num_green_ml > 100:
+                new_green_potions += 1
+                num_green_ml -= 100
+                current_potions += 1
+            if num_blue_ml > 100:
+                new_blue_potions += 1
+                num_blue_ml -= 100
+                current_potions += 1
+            if num_blue_ml > 50 and num_red_ml > 50:
+                new_purple_potions += 1
+                num_blue_ml -= 50
+                num_red_ml -= 50
+                current_potions += 1
+            if num_red_ml > 50 and num_green_ml > 50:
+                new_yellow_potions += 1
+                num_red_ml -= 50
+                num_green_ml -= 50
+                current_potions += 1
+
+        while current_potions > potion_limit:
+            new_green_potions -= 1
+            current_potions -= 1
+        
+        print(f"limit: {potion_limit}")
+        print(f"current potions: {current_potions}")
         
         print(f"red_ml after: {num_red_ml}, blue_ml: {num_blue_ml}, green_ml: {num_green_ml}")
 
-        if potion_amounts["red"] > 0:
-            result.append({"potion_type": potion_requirements["RED_POTION_0"], "quantity": potion_amounts["red"]})
-        if potion_amounts["green"] > 0:
-            result.append({"potion_type": potion_requirements["GREEN_POTION_0"], "quantity": potion_amounts["green"]})
-        if potion_amounts["blue"] > 0:
-            result.append({"potion_type": potion_requirements["BLUE_POTION_0"], "quantity": potion_amounts["blue"]})
-        if potion_amounts["dark"] > 0:
-            result.append({"potion_type": potion_requirements["DARK_POTION_0"], "quantity": potion_amounts["dark"]})
-        if potion_amounts["purple"] > 0:
-            result.append({"potion_type": potion_requirements["PURPLE_POTION_0"], "quantity": potion_amounts["purple"]})
-        if potion_amounts["yellow"] > 0:
-            result.append({"potion_type": potion_requirements["YELLOW_POTION_0"], "quantity": potion_amounts["yellow"]})
+        if new_red_potions > 0:
+            result.append({"potion_type": potion_requirements["RED_POTION_0"], "quantity": new_red_potions})
+        if new_green_potions > 0:
+            result.append({"potion_type": potion_requirements["GREEN_POTION_0"], "quantity": new_green_potions})
+        if new_blue_potions > 0:
+            result.append({"potion_type": potion_requirements["BLUE_POTION_0"], "quantity": new_blue_potions})
+        if new_yellow_potions > 0:
+            result.append({"potion_type": potion_requirements["PURPLE_POTION_0"], "quantity": new_yellow_potions})
+        if new_purple_potions > 0:
+            result.append({"potion_type": potion_requirements["YELLOW_POTION_0"], "quantity": new_purple_potions})
 
     print(result)
     return result
