@@ -170,6 +170,8 @@ def get_bottle_plan():
         new_yellow_potions = 0
         new_dark_potions = 0
 
+        print(f"max red potions: {num_red_ml // 100}, max green potions: {num_green_ml // 100}, max blue: {num_blue_ml // 100}")
+
         while current_potions < potion_limit:
             if num_red_ml > 100:
                 new_red_potions += 1
@@ -183,20 +185,7 @@ def get_bottle_plan():
                 new_blue_potions += 1
                 num_blue_ml -= 100
                 current_potions += 1
-            if num_dark_ml > 100:
-                new_dark_potions += 1
-                num_dark_ml -= 100
-                current_potions += 1
-            if num_blue_ml > 50 and num_red_ml > 50:
-                new_purple_potions += 1
-                num_blue_ml -= 50
-                num_red_ml -= 50
-                current_potions += 1
-            if num_red_ml > 50 and num_green_ml > 50:
-                new_yellow_potions += 1
-                num_red_ml -= 50
-                num_green_ml -= 50
-                current_potions += 1
+
 
         while current_potions > potion_limit:
             new_green_potions -= 1
