@@ -77,7 +77,7 @@ def get_capacity_plan():
         elif gold >= 1100:
             if curr_ml_capacity >= curr_potion_capacity:
                 potion_capacity += 1
-                
+
             else:
                 ml_capacity += 1
         
@@ -111,7 +111,7 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
             print(transaction_id)
             connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                     VALUES (:gold_id, :transaction_id, :gold_spent)"""), 
-                                                   {"gold_id" : 1, "transaction_id": transaction_id, "gold_spent" : gold_spent})
+                                                   {"gold_id" : 1, "transaction_id": transaction_id, "gold_spent" : -gold_spent})
             connection.execute(sqlalchemy.text("""
                                                 UPDATE global_inventory SET 
                                                 ml_capacity = ml_capacity + :new_ml_capacity,
