@@ -177,15 +177,16 @@ def get_bottle_plan():
                 new_red_potions += 1
                 num_red_ml -= 100
                 current_potions += 1
-            if num_green_ml > 100:
+            elif num_green_ml > 100:
                 new_green_potions += 1
                 num_green_ml -= 100
                 current_potions += 1
-            if num_blue_ml > 100:
+            elif num_blue_ml > 100:
                 new_blue_potions += 1
                 num_blue_ml -= 100
                 current_potions += 1
-
+            else:
+                break
 
         while current_potions > potion_limit:
             new_green_potions -= 1
