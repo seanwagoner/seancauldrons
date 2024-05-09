@@ -100,7 +100,7 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
     """
     with db.engine.begin() as connection:
         if capacity_purchase.potion_capacity or capacity_purchase.ml_capacity:
-            gold_spent = (1000 * capacity_purchase.ml_capacity + capacity_purchase.potion_capacity)
+            gold_spent = (1000 * capacity_purchase.ml_capacity) + (1000 * capacity_purchase.potion_capacity)
             new_potion_capacity = capacity_purchase.potion_capacity * 50
             new_ml_capacity = capacity_purchase.ml_capacity * 10000
             print(gold_spent)
