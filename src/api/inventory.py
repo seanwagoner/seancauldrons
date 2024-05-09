@@ -120,8 +120,8 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
                                            "new_potion_capacity" : new_potion_capacity})
     
 
-    print("new potion cap: ", new_potion_capacity)
-    print("new ml cap: ", new_ml_capacity)
+    print("added potion cap: ", new_potion_capacity)
+    print("added ml cap: ", new_ml_capacity)
 
 
     return "OK"
