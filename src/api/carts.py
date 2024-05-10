@@ -85,7 +85,7 @@ def search_orders(
     if sort_order == search_sort_order.desc:
         order_by = sqlalchemy.desc(order_by)
 
-    stmt = stmt.order_by(order_by, db.cart_items.c.item_id).limit(5).offset(offset)
+    stmt = stmt.order_by(order_by, db.cart_items.c.item_id).limit(6).offset(offset)
 
     with db.engine.connect() as conn:
         results = conn.execute(stmt).fetchall()
@@ -98,10 +98,11 @@ def search_orders(
         "timestamp": row.created_at.isoformat(),
     } for row in results]
 
+
     return {
-        "previous": search_page - 1 if offset > 0 else None,
-        "next": search_page + 1 if len(results) == 5 else None,
-        "results": formatted_results
+        "previous": search_page - 1 if search_page > 0 else None,
+        "next": search_page + 1 if len(results) == 6 else None,
+        "results": formatted_results[:5]
     }
 
 
