@@ -100,8 +100,8 @@ def search_orders(
 
 
     return {
-        "previous": search_page - 1 if search_page > 0 else None,
-        "next": search_page + 1 if len(results) == 6 else None,
+        "previous": str(search_page - 1) if search_page > 0 else None,
+        "next": str(search_page + 1) if len(results) == 6 else None,
         "results": formatted_results[:5]
     }
 
