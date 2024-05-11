@@ -136,11 +136,23 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     selling_large = any(item.sku.startswith('LARGE') for item in wholesale_catalog)
 
+
     threshold = ml_threshold_large if selling_large else ml_threshold_normal
+
+    for barrel in wholesale_catalog:
+        if barrel.potion_type == [0,0,0,1] and ml_inventory[3] < threshold:
+            purchase_plan.append({'sku': barrel.sku,
+                        'quantity': 1,
+                        'total_ml': barrel.ml_per_barrel * 1,
+                        'total_cost': barrel.price * 1})
+            gold -= barrel.price * 1
+            current_ml += barrel.ml_per_barrel * 1
+            break
+
     for i, ml in enumerate(ml_inventory):
         if ml < threshold:
             potion_type = [int(j == i) for j in range(4)]
-            barrel_purchase = calculate_barrel_to_purchase(wholesale_catalog, gold // 4 if gold > 300 else gold, potion_type, MAX_ML - current_ml)
+            barrel_purchase = calculate_barrel_to_purchase(wholesale_catalog, gold, potion_type, MAX_ML - current_ml)
             if barrel_purchase:
                 price = next(item.price for item in wholesale_catalog if item.sku == barrel_purchase['sku'])
                 ml_per_barrel = next(item.ml_per_barrel for item in wholesale_catalog if item.sku == barrel_purchase['sku'])
