@@ -79,7 +79,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                                                    VALUES (:potion_id, :transaction_id, :new_potions)"""), 
                                                    {"potion_id" : 10, "transaction_id": transaction_id, "new_potions" : new_dark_potions})
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
-                                                   VALUES (:dark_ml_id, :transaction_id, :red_ml)"""), 
+                                                   VALUES (:dark_ml_id, :transaction_id, :dark_ml)"""), 
                                                    {"dark_ml_id" : 5, "transaction_id": transaction_id, "dark_ml" : -num_dark_ml_used})
             elif potion.potion_type == [50, 0, 50, 0]: 
                 new_purple_potions += potion.quantity
