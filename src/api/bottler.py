@@ -30,6 +30,8 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     num_dark_ml_used = 0
     new_purple_potions = 0
     new_yellow_potions = 0
+    new_white_potions = 0
+    new_teal_potions = 0
     potions_added = 0
     
     with db.engine.begin() as connection:
@@ -99,6 +101,36 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                    VALUES (:red_ml_id, :transaction_id, :red_ml)"""), 
                                                    {"red_ml_id" : 2, "transaction_id": transaction_id, "red_ml" : -num_red_ml_used})
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:green_ml_id, :transaction_id, :green_ml)"""), 
+                                                   {"green_ml_id" : 3, "transaction_id": transaction_id, "green_ml" : -num_green_ml_used})
+            elif potion.potion_type == [33, 34, 33, 0]:
+                new_white_potions += potion.quantity
+                num_red_ml_used += 50 * potion.quantity
+                num_green_ml_used += 50 * potion.quantity
+                num_blue_ml_used += 50 * potion.quantity
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:potion_id, :transaction_id, :new_potions)"""), 
+                                                   {"potion_id" : 13, "transaction_id": transaction_id, "new_potions" : new_white_potions})
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:red_ml_id, :transaction_id, :red_ml)"""), 
+                                                   {"red_ml_id" : 2, "transaction_id": transaction_id, "red_ml" : -num_red_ml_used})
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:green_ml_id, :transaction_id, :green_ml)"""), 
+                                                   {"green_ml_id" : 3, "transaction_id": transaction_id, "green_ml" : -num_green_ml_used})
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:blue_ml_id, :transaction_id, :blue_ml)"""), 
+                                                   {"blue_ml_id" : 4, "transaction_id": transaction_id, "blue_ml" : -num_blue_ml_used})
+            elif potion.potion_type == [0, 50, 50, 0]:
+                new_teal_potions += potion.quantity
+                num_blue_ml_used += 50 * potion.quantity
+                num_green_ml_used += 50 * potion.quantity
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:potion_id, :transaction_id, :new_potions)"""), 
+                                                   {"potion_id" : 14, "transaction_id": transaction_id, "new_potions" : new_teal_potions})
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:blue_ml_id, :transaction_id, :blue_ml)"""), 
+                                                   {"blue_ml_id" : 4, "transaction_id": transaction_id, "blue_ml" : -num_blue_ml_used})
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                    VALUES (:green_ml_id, :transaction_id, :green_ml)"""), 
                                                    {"green_ml_id" : 3, "transaction_id": transaction_id, "green_ml" : -num_green_ml_used})
