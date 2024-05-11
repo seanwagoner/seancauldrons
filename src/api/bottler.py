@@ -135,8 +135,6 @@ def get_bottle_plan():
     result = []
     with db.engine.begin() as connection:
 
-        current_total_potions = 0
-
         num_red_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :supply_id"""), {"supply_id" : 2}).scalar()
         num_green_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
@@ -171,7 +169,7 @@ def get_bottle_plan():
 
         potion_limit = connection.execute(sqlalchemy.text("""SELECT potion_capacity FROM global_inventory""")).fetchone()[0]
 
-        current_potions = red_potions + green_potions + blue_potions + dark_potions + purple_potions + yellow_potions
+        current_potions = red_potions + green_potions + blue_potions + dark_potions + purple_potions + yellow_potions + white_potions + teal_potions
         new_red_potions = 0
         new_green_potions = 0
         new_blue_potions = 0

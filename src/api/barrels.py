@@ -59,7 +59,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                 dark_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                    VALUES (:dark_ml_id, :transaction_id, :dark_ml)"""), 
-                                                   {"dark_ml_id" : 5, "transaction_id": transaction_id, "red_ml" : dark_ml})
+                                                   {"dark_ml_id" : 5, "transaction_id": transaction_id, "dark_ml" : dark_ml})
             else:
                 raise Exception("Invalid potion type")
             
