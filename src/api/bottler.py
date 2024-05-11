@@ -182,19 +182,19 @@ def get_bottle_plan():
         print(f"max red potions: {num_red_ml // 100}, max green potions: {num_green_ml // 100}, max blue: {num_blue_ml // 100}, max dark: {num_dark_ml // 100}")
 
         while current_potions < potion_limit:
-            if num_red_ml >= 100 and red_potions < potion_limit / 4:
+            if num_red_ml >= 100 and red_potions < int(potion_limit / 4) and current_potions < potion_limit:
                 new_red_potions += 1
                 num_red_ml -= 100
                 current_potions += 1
-            elif num_green_ml >= 100 and green_potions < potion_limit / 4:
+            elif num_green_ml >= 100 and green_potions < int(potion_limit / 4) and current_potions < potion_limit:
                 new_green_potions += 1
                 num_green_ml -= 100
                 current_potions += 1
-            elif num_blue_ml >= 100 and blue_potions < potion_limit / 4:
+            elif num_blue_ml >= 100 and blue_potions < int(potion_limit / 4) and current_potions < potion_limit:
                 new_blue_potions += 1
                 num_blue_ml -= 100
                 current_potions += 1
-            elif num_dark_ml >= 100 and dark_potions < potion_limit / 4:
+            elif num_dark_ml >= 100 and dark_potions < int(potion_limit / 4) and current_potions < potion_limit:
                 new_dark_potions += 1
                 num_dark_ml -= 100
                 current_potions += 1
@@ -203,22 +203,22 @@ def get_bottle_plan():
         
         #pretty colors
         while current_potions < potion_limit:
-            if num_red_ml >= 50 and num_blue_ml >= 50 and purple_potions < potion_limit / 4:
+            if num_red_ml >= 50 and num_blue_ml >= 50 and purple_potions < int(potion_limit) / 4 and current_potions < potion_limit:
                 new_purple_potions += 1
                 num_red_ml -= 50
                 num_blue_ml -= 50
                 current_potions += 1
-            elif num_red_ml >= 50 and num_green_ml >= 50 and yellow_potions < potion_limit / 4:
+            elif num_red_ml >= 50 and num_green_ml >= 50 and yellow_potions < int(potion_limit) / 4 and current_potions < potion_limit:
                 new_yellow_potions += 1
                 num_red_ml -= 50
                 num_green_ml -= 50
                 current_potions += 1
-            elif num_blue_ml >= 50 and num_green_ml >= 50 and teal_potions < potion_limit / 4:
+            elif num_blue_ml >= 50 and num_green_ml >= 50 and teal_potions < int(potion_limit) / 4 and current_potions < potion_limit:
                 new_teal_potions += 1
                 num_blue_ml -= 50
                 num_green_ml -= 50
                 current_potions += 1
-            elif num_red_ml >= 33 and num_green_ml >= 34 and num_blue_ml >= 33 and white_potions < potion_limit / 4:
+            elif num_red_ml >= 33 and num_green_ml >= 34 and num_blue_ml >= 33 and white_potions < int(potion_limit) / 4 and current_potions < potion_limit:
                 new_white_potions += 1
                 num_red_ml -= 33
                 num_green_ml -= 34
