@@ -118,7 +118,9 @@ def get_bottle_plan():
         "RED_POTION_0": [100, 0, 0, 0],
         "DARK_POTION_0": [0, 0, 0, 100],
         "PURPLE_POTION_0": [50, 0, 50, 0],  
-        "YELLOW_POTION_0": [50, 50, 0, 0] 
+        "YELLOW_POTION_0": [50, 50, 0, 0],
+        "TEAL_POTION_0": [0, 50, 50, 0],
+        "WHITE_POTION_0": [33, 34, 33, 0],
     }
 
     potion_amounts = {
