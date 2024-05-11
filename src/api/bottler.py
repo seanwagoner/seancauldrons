@@ -51,6 +51,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                    VALUES (:green_ml_id, :transaction_id, :green_ml)"""), 
                                                    {"green_ml_id" : 3, "transaction_id": transaction_id, "green_ml" : -num_green_ml_used})
+                num_green_ml_used = 0
             elif potion.potion_type == [100, 0, 0, 0]:
                 new_red_potions += potion.quantity
                 num_red_ml_used += 100 * potion.quantity
@@ -60,6 +61,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                    VALUES (:red_ml_id, :transaction_id, :red_ml)"""), 
                                                    {"red_ml_id" : 2, "transaction_id": transaction_id, "red_ml" : -num_red_ml_used})
+                num_red_ml_used = 0
             elif potion.potion_type == [0, 0, 100, 0]:
                 new_blue_potions += potion.quantity
                 num_blue_ml_used += 100 * potion.quantity
@@ -69,6 +71,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                    VALUES (:blue_ml_id, :transaction_id, :blue_ml)"""), 
                                                    {"blue_ml_id" : 4, "transaction_id": transaction_id, "blue_ml" : -num_blue_ml_used})
+                num_blue_ml_used = 0
             elif potion.potion_type == [0, 0, 0, 100]:
                 new_dark_potions += potion.quantity
                 num_dark_ml_used += 100 * potion.quantity
@@ -91,6 +94,8 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                    VALUES (:red_ml_id, :transaction_id, :red_ml)"""), 
                                                    {"red_ml_id" : 2, "transaction_id": transaction_id, "red_ml" : -num_red_ml_used})
+                num_red_ml_used = 0
+                num_blue_ml_used = 0
             elif potion.potion_type == [50, 50, 0, 0]:
                 new_yellow_potions += potion.quantity
                 num_red_ml_used += 50 * potion.quantity
@@ -104,6 +109,8 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                    VALUES (:green_ml_id, :transaction_id, :green_ml)"""), 
                                                    {"green_ml_id" : 3, "transaction_id": transaction_id, "green_ml" : -num_green_ml_used})
+                num_red_ml_used = 0
+                num_green_ml_used = 0
             elif potion.potion_type == [33, 34, 33, 0]:
                 new_white_potions += potion.quantity
                 num_red_ml_used += 50 * potion.quantity
@@ -121,6 +128,9 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                    VALUES (:blue_ml_id, :transaction_id, :blue_ml)"""), 
                                                    {"blue_ml_id" : 4, "transaction_id": transaction_id, "blue_ml" : -num_blue_ml_used})
+                num_red_ml_used = 0
+                num_green_ml_used = 0
+                num_blue_ml_used = 0
             elif potion.potion_type == [0, 50, 50, 0]:
                 new_teal_potions += potion.quantity
                 num_blue_ml_used += 50 * potion.quantity
@@ -134,6 +144,8 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
                                                    VALUES (:green_ml_id, :transaction_id, :green_ml)"""), 
                                                    {"green_ml_id" : 3, "transaction_id": transaction_id, "green_ml" : -num_green_ml_used})
+                num_green_ml_used = 0
+                num_blue_ml_used = 0
 
     print(f"potions delivered: {potions_delivered} order_id: {order_id}")
 
