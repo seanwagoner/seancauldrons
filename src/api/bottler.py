@@ -263,6 +263,8 @@ def get_bottle_plan():
                 num_green_ml -= 34
                 num_blue_ml -= 33
                 current_potions += 1
+            else:
+                break
 
         while current_potions > potion_limit:
             new_red_potions -= 1
