@@ -23,9 +23,11 @@ def get_catalog():
 
     catalog = []
     for column in result:
+        if len(catalog) >= 6:
+            break
         potion_type = [column[3], column[4], column[5], column[6]]
 
-        if column[1] > 0 and not column[5] >= 50:
+        if column[1] > 0:
             catalog.append({
                 "sku": column[0], 
                 "name": column[0].split('_')[0].lower() + " potion",  
