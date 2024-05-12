@@ -140,7 +140,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     threshold = ml_threshold_large if selling_large else ml_threshold_normal
 
     for barrel in wholesale_catalog:
-        if barrel.potion_type == [0,0,0,1] and ml_inventory[3] < threshold:
+        if barrel.potion_type == [0,0,1,0] and ml_inventory[3] < threshold:
             purchase_plan.append({'sku': barrel.sku,
                         'quantity': 1,
                         'total_ml': barrel.ml_per_barrel * 1,
