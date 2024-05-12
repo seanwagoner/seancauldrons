@@ -118,19 +118,19 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     
         gold = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :gold_id"""), {"gold_id" : 1}).fetchone()[0]
-        num_red_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+        red_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :red_ml_id"""), {"red_ml_id" : 2}).fetchone()[0]
-        num_green_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+        green_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :green_ml_id"""), {"green_ml_id" : 3}).fetchone()[0]
-        num_blue_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+        blue_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :blue_ml_id"""), {"blue_ml_id" : 4}).fetchone()[0]
-        num_dark_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+        dark_ml = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :dark_ml_id"""), {"dark_ml_id" : 5}).fetchone()[0]
     ml_threshold_normal = result[0]
     ml_threshold_large = result[1]
     MAX_ML = result[2]
-    ml_inventory = [num_green_ml, num_red_ml, num_blue_ml, num_dark_ml]
-    current_ml = sum(ml_inventory)
+    ml_inventory = [green_ml, red_ml, blue_ml, dark_ml]
+    total_ml = sum(ml_inventory)
 
     purchase_plan = []
 
@@ -139,26 +139,167 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     threshold = ml_threshold_large if selling_large else ml_threshold_normal
 
-    for barrel in wholesale_catalog:
-        if barrel.potion_type == [0,0,1,0] and ml_inventory[3] < threshold:
-            purchase_plan.append({'sku': barrel.sku,
-                        'quantity': 1,
-                        'total_ml': barrel.ml_per_barrel * 1,
-                        'total_cost': barrel.price * 1})
-            gold -= barrel.price * 1
-            current_ml += barrel.ml_per_barrel * 1
-            break
+    # for i, ml in enumerate(ml_inventory):
+    #     if ml < threshold:
+    #         potion_type = [int(j == i) for j in range(4)]
+    #         barrel_purchase = calculate_barrel_to_purchase(wholesale_catalog, gold, potion_type, MAX_ML - current_ml)
+    #         if barrel_purchase:
+    #             price = next(item.price for item in wholesale_catalog if item.sku == barrel_purchase['sku'])
+    #             ml_per_barrel = next(item.ml_per_barrel for item in wholesale_catalog if item.sku == barrel_purchase['sku'])
+    #             purchase_plan.append(barrel_purchase)
+    #             gold -= price * barrel_purchase['quantity']
+    #             current_ml += ml_per_barrel * barrel_purchase['quantity']
 
-    for i, ml in enumerate(ml_inventory):
-        if ml < threshold:
-            potion_type = [int(j == i) for j in range(4)]
-            barrel_purchase = calculate_barrel_to_purchase(wholesale_catalog, gold, potion_type, MAX_ML - current_ml)
-            if barrel_purchase:
-                price = next(item.price for item in wholesale_catalog if item.sku == barrel_purchase['sku'])
-                ml_per_barrel = next(item.ml_per_barrel for item in wholesale_catalog if item.sku == barrel_purchase['sku'])
-                purchase_plan.append(barrel_purchase)
-                gold -= price * barrel_purchase['quantity']
-                current_ml += ml_per_barrel * barrel_purchase['quantity']
+    colors = [0,0,0,0]
+    loop = False
+    #large barrels loop
+    print(f"TOTAL ML {total_ml}")
+    for barrel in wholesale_catalog:
+        if "LARGE" in barrel.sku:
+            loop = True
+            break
+    while gold >= 400 and loop and total_ml + 10000 <= MAX_ML:
+        if gold >= 750 and dark_ml < 10000:
+            colors[3] += 1
+            gold -= 750
+            dark_ml += 10000
+        elif min(red_ml, green_ml, blue_ml) == red_ml and gold >= 500:
+            colors[0] += 1
+            gold -= 500
+            red_ml += 10000
+        elif min(red_ml, green_ml, blue_ml) == green_ml and gold >= 400:
+            colors[1] += 1
+            gold -= 400
+            green_ml += 10000
+        elif min(red_ml, green_ml, blue_ml) == blue_ml and gold >= 600:
+            colors[2] += 1
+            gold -= 600
+            blue_ml += 10000
+        else:
+            loop = False
+        total_ml = green_ml + red_ml + blue_ml + dark_ml
+    if colors[0] > 0:
+        purchase_plan.append(
+            {
+                "sku": "LARGE_RED_BARREL",
+                "quantity": colors[0]
+            }
+        )
+    if colors[1] > 0:
+        purchase_plan.append(
+            {
+                "sku": "LARGE_GREEN_BARREL",
+                "quantity": colors[1]
+            }
+        )
+    if colors[2] > 0:
+        purchase_plan.append(
+            {
+                "sku": "LARGE_BLUE_BARREL",
+                "quantity": colors[2]
+            }
+        )
+    if colors[3] > 0:
+        purchase_plan.append(
+            {
+                "sku": "LARGE_DARK_BARREL",
+                "quantity": colors[3]
+            }
+        )
+    #medium
+    loop = False
+    for barrel in wholesale_catalog:
+        if "MEDIUM" in barrel.sku:
+            loop = True
+            break
+    colors = [0,0,0,0]
+    while gold >= 250 and loop and total_ml + 2500 <= MAX_ML:
+        if min(red_ml, green_ml, blue_ml) > MAX_ML/16:
+            loop = False
+        if min(red_ml, green_ml, blue_ml) == red_ml and gold >= 250:
+            colors[0] += 1
+            gold -= 250
+            red_ml += 2500
+        elif min(red_ml, green_ml, blue_ml) == green_ml and gold >= 250:
+            colors[1] += 1
+            gold -= 250
+            green_ml += 2500
+        elif min(red_ml, green_ml, blue_ml) == blue_ml and gold >= 300:
+            colors[2] += 1
+            gold -= 300
+            blue_ml += 2500
+        else:
+            loop = False
+        total_ml = green_ml + red_ml + blue_ml + dark_ml
+    if colors[0] > 0:
+        purchase_plan.append(
+            {
+                "sku": "MEDIUM_RED_BARREL",
+                "quantity": colors[0]
+            }
+        )
+    if colors[1] > 0:
+        purchase_plan.append(
+            {
+                "sku": "MEDIUM_GREEN_BARREL",
+                "quantity": colors[1]
+            }
+        )
+    if colors[2] > 0:
+        purchase_plan.append(
+            {
+                "sku": "MEDIUM_BLUE_BARREL",
+                "quantity": colors[2]
+            }
+        )
+    #small
+    loop = False
+    print(f"TOTAL ML {total_ml}")
+    print(f"MAX_ML {MAX_ML}")
+    for barrel in wholesale_catalog:
+        if "SMALL" in barrel.sku:
+            loop = True
+            break
+    colors = [0,0,0,0]
+    while gold >= 100 and loop and total_ml + 500 <= MAX_ML:
+        if min(red_ml, green_ml, blue_ml) > MAX_ML/16:
+            loop = False
+        if min(red_ml, green_ml, blue_ml) == red_ml and gold >= 250:
+            colors[0] += 1
+            gold -= 100
+            red_ml += 500
+        elif min(red_ml, green_ml, blue_ml) == green_ml and gold >= 250:
+            colors[1] += 1
+            gold -= 100
+            green_ml += 500
+        elif min(red_ml, green_ml, blue_ml) == blue_ml and gold >= 300:
+            colors[2] += 1
+            gold -= 120
+            blue_ml += 500
+        else:
+            loop = False
+        total_ml = green_ml + red_ml + blue_ml + dark_ml
+    if colors[0] > 0:
+        purchase_plan.append(
+            {
+                "sku": "SMALL_RED_BARREL",
+                "quantity": colors[0]
+            }
+        )
+    if colors[1] > 0:
+        purchase_plan.append(
+            {
+                "sku": "SMALL_GREEN_BARREL",
+                "quantity": colors[1]
+            }
+        )
+    if colors[2] > 0:
+        purchase_plan.append(
+            {
+                "sku": "SMALL_BLUE_BARREL",
+                "quantity": colors[2]
+            }
+        )
 
     print(f"purchase plan : {purchase_plan}")
 
