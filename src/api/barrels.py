@@ -264,15 +264,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     while gold >= 100 and loop and total_ml + 500 <= MAX_ML:
         if min(red_ml, green_ml, blue_ml) > MAX_ML/16:
             loop = False
-        if min(red_ml, green_ml, blue_ml) == red_ml and gold >= 250:
+        if min(red_ml, green_ml, blue_ml) == red_ml and gold >= 100:
             colors[0] += 1
             gold -= 100
             red_ml += 500
-        elif min(red_ml, green_ml, blue_ml) == green_ml and gold >= 250:
+        elif min(red_ml, green_ml, blue_ml) == green_ml and gold >= 100:
             colors[1] += 1
             gold -= 100
             green_ml += 500
-        elif min(red_ml, green_ml, blue_ml) == blue_ml and gold >= 300:
+        elif min(red_ml, green_ml, blue_ml) == blue_ml and gold >= 120:
             colors[2] += 1
             gold -= 120
             blue_ml += 500
