@@ -205,6 +205,7 @@ def get_bottle_plan():
         teal_potions = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :supply_id"""), {"supply_id" : 14}).scalar()
         
+        
         print(f"current red potions: {red_potions}, current blue_potions: {blue_potions}, current green_potions: {green_potions}")
         print(f"current purple potions: {purple_potions}, current yellow_potions: {yellow_potions}")
         print(f"current dark potions: {dark_potions}, current white_potions: {white_potions}, current teal_potions: {teal_potions}")

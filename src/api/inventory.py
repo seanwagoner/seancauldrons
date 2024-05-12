@@ -48,10 +48,16 @@ def get_inventory():
 
         ml_in_barrels = green_ml + blue_ml + red_ml + dark_ml
     
-    print(f"red_ml: {red_ml}, green_ml: {green_ml}, blue_ml: {blue_ml}, dark_ml: {dark_ml}")
-    print(f"red_potions: {red_potion}, green: {green_potion}, blue: {blue_potion}, dark: {dark_potion}")
-    print(f"purple_potions: {purple_potion}, yellow: {yellow_potion}, white: {white_potion}, teal: {teal_potion}")
-    print(f"num_potions: {num_potions}, ml_in_barrels: {ml_in_barrels}, gold: {gold}\n")
+    print("--------------------------------------------------------------------------------")
+    print("BARRELS: \n")
+    print(f"RED: {red_ml}, GREEN: {green_ml}, BLUE: {blue_ml}, DARK: {dark_ml}")
+    print("--------------------------------------------------------------------------------")
+    print("POTIONS: \n")
+    print(f"RED: {red_potion}, GREEN: {green_potion}, BLUE: {blue_potion}, DARK: {dark_potion}")
+    print(f"PURPLE: {purple_potion}, YELLOW: {yellow_potion}, WHITE: {white_potion}, TEAL: {teal_potion}")
+    print("--------------------------------------------------------------------------------")
+    print("QUANTITIES: \n")
+    print(f"TOTAL POTIONS: {num_potions} || TOTAL ML: {ml_in_barrels} || GOLD: {gold}\n")
     
     return {"number_of_potions": num_potions, "ml_in_barrels": ml_in_barrels, "gold": gold}
 
