@@ -42,27 +42,27 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             gold_paid -= barrel_delivered.price * barrel_delivered.quantity
             if barrel_delivered.potion_type == [1, 0, 0, 0]:
                 red_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
-                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
-                                                   VALUES (:red_ml_id, :transaction_id, :red_ml)"""), 
-                                                   {"red_ml_id" : 2, "transaction_id": transaction_id, "red_ml" : red_ml})
             elif barrel_delivered.potion_type == [0, 1, 0, 0]:
                 green_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
-                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
-                                                   VALUES (:green_ml_id, :transaction_id, :green_ml)"""), 
-                                                   {"green_ml_id" : 3, "transaction_id": transaction_id, "green_ml" : green_ml})
             elif barrel_delivered.potion_type == [0, 0, 1, 0]:
                 blue_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
-                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
-                                                   VALUES (:blue_ml_id, :transaction_id, :blue_ml)"""), 
-                                                   {"blue_ml_id" : 4, "transaction_id": transaction_id, "blue_ml" : blue_ml})
             elif barrel_delivered.potion_type == [0, 0, 0, 1]:
                 dark_ml += barrel_delivered.ml_per_barrel * barrel_delivered.quantity
-                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
-                                                   VALUES (:dark_ml_id, :transaction_id, :dark_ml)"""), 
-                                                   {"dark_ml_id" : 5, "transaction_id": transaction_id, "dark_ml" : dark_ml})
             else:
                 raise Exception("Invalid potion type")
-            
+        connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:red_ml_id, :transaction_id, :red_ml)"""), 
+                                                   {"red_ml_id" : 2, "transaction_id": transaction_id, "red_ml" : red_ml})    
+        connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:green_ml_id, :transaction_id, :green_ml)"""), 
+                                                   {"green_ml_id" : 3, "transaction_id": transaction_id, "green_ml" : green_ml})
+        connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:blue_ml_id, :transaction_id, :blue_ml)"""), 
+                                                   {"blue_ml_id" : 4, "transaction_id": transaction_id, "blue_ml" : blue_ml})
+        connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:dark_ml_id, :transaction_id, :dark_ml)"""), 
+                                                   {"dark_ml_id" : 5, "transaction_id": transaction_id, "dark_ml" : dark_ml})
+
         gold = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :gold_id"""), {"gold_id" : 1}).fetchone()[0]
         
