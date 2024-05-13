@@ -22,11 +22,37 @@ def get_catalog():
         
     catalog = []
     for column in result:
+        potion_type = [column[3], column[4], column[5], column[6]]
+        if potion_type == [0, 50, 50, 0] and column[1] > 0:
+            print("adding teal")
+            teal_potion = {
+                "sku": column[0],
+                "name": column[0].split('_')[0].lower() + " potion",
+                "quantity": column[1],
+                "price": column[2],
+                "potion_type": potion_type
+            }
+            if column[1] > 0:
+                catalog.append(teal_potion)
+        if potion_type == [25, 25, 25, 25] and column[1] > 0:
+            print("adding rainbow")
+            rainbow_potion = {
+                "sku": column[0],
+                "name": column[0].split('_')[0].lower() + " potion",
+                "quantity": column[1],
+                "price": column[2],
+                "potion_type": potion_type
+            }
+            if column[1] > 0:
+                catalog.append(rainbow_potion)
+
+    for column in result:
         if len(catalog) >= 6:
             break
         potion_type = [column[3], column[4], column[5], column[6]]
 
-        if column[1] > 0:
+
+        if column[1] > 0 and column[0] != "TEAL_POTION_0":
             catalog.append({
                 "sku": column[0], 
                 "name": column[0].split('_')[0].lower() + " potion",  
