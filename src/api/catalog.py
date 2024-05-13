@@ -19,8 +19,7 @@ def get_catalog():
                 GROUP BY p.item_sku, p.price, p.red, p.green, p.blue, p.dark
                 """
             )).fetchall()
-    
-
+        
     catalog = []
     for column in result:
         if len(catalog) >= 6:

@@ -32,6 +32,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     new_yellow_potions = 0
     new_white_potions = 0
     new_teal_potions = 0
+    new_rainbow_potions = 0
     potions_added = 0
     
     with db.engine.begin() as connection:
@@ -147,6 +148,31 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                                                    {"green_ml_id" : 3, "transaction_id": transaction_id, "green_ml" : -num_green_ml_used})
                 num_green_ml_used = 0
                 num_blue_ml_used = 0
+            elif potion.potion_type == [25, 25, 25, 25]:
+                new_rainbow_potions += potion.quantity
+                num_blue_ml_used += 25 * potion.quantity
+                num_green_ml_used += 25 * potion.quantity
+                num_red_ml_used += 25 * potion.quantity
+                num_dark_ml_used += 25 * potion.quantity
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:potion_id, :transaction_id, :new_potions)"""), 
+                                                   {"potion_id" : 15, "transaction_id": transaction_id, "new_potions" : new_rainbow_potions})
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:blue_ml_id, :transaction_id, :blue_ml)"""), 
+                                                   {"blue_ml_id" : 4, "transaction_id": transaction_id, "blue_ml" : -num_blue_ml_used})
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:green_ml_id, :transaction_id, :green_ml)"""), 
+                                                   {"green_ml_id" : 3, "transaction_id": transaction_id, "green_ml" : -num_green_ml_used})
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:red_ml_id, :transaction_id, :red_ml)"""), 
+                                                   {"red_ml_id" : 2, "transaction_id": transaction_id, "red_ml" : -num_red_ml_used})
+                connection.execute(sqlalchemy.text("""INSERT INTO supply_ledger_entries (supply_id, supply_transaction_id, change)
+                                                   VALUES (:dark_ml_id, :transaction_id, :dark_ml)"""), 
+                                                   {"dark_ml_id" : 5, "transaction_id": transaction_id, "dark_ml" : -num_dark_ml_used})
+                num_red_ml_used = 0
+                num_dark_ml_used = 0
+                num_green_ml_used = 0
+                num_blue_ml_used = 0
 
     print(f"potions delivered: {potions_delivered} order_id: {order_id}")
 
@@ -166,16 +192,17 @@ def get_bottle_plan():
         "YELLOW_POTION_0": [50, 50, 0, 0],
         "TEAL_POTION_0": [0, 50, 50, 0],
         "WHITE_POTION_0": [33, 34, 33, 0],
+        "RAINBOW_POTION_0": [25,25,25,25]
     }
 
-    potion_amounts = {
-        "red": 0,
-        "green" : 0,
-        "blue" : 0,
-        "dark" : 0,
-        "purple" : 0,
-        "yellow" : 0
-    }
+    # potion_amounts = {
+    #     "red": 0,
+    #     "green" : 0,
+    #     "blue" : 0,
+    #     "dark" : 0,
+    #     "purple" : 0,
+    #     "yellow" : 0
+    # }
     
     result = []
     with db.engine.begin() as connection:
@@ -205,17 +232,23 @@ def get_bottle_plan():
                                            WHERE supply_id = :supply_id"""), {"supply_id" : 13}).scalar()
         teal_potions = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :supply_id"""), {"supply_id" : 14}).scalar()
+        rainbow_potions = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 15}).scalar()
+        
+        print(f"RAINBOW: {rainbow_potions}")
+        
         
         
         print(f"current red potions: {red_potions}, current blue_potions: {blue_potions}, current green_potions: {green_potions}")
         print(f"current purple potions: {purple_potions}, current yellow_potions: {yellow_potions}")
         print(f"current dark potions: {dark_potions}, current white_potions: {white_potions}, current teal_potions: {teal_potions}")
-
+        print(f"current rainbow potions: {rainbow_potions}")
+               
         print(f"red_ml: {num_red_ml}, blue_ml: {num_blue_ml}, green_ml: {num_green_ml}, dark_ml: {num_dark_ml}")
 
         potion_limit = connection.execute(sqlalchemy.text("""SELECT potion_capacity FROM global_inventory""")).fetchone()[0]
 
-        current_potions = red_potions + green_potions + blue_potions + dark_potions + purple_potions + yellow_potions + white_potions + teal_potions
+        current_potions = red_potions + green_potions + blue_potions + dark_potions + purple_potions + yellow_potions + white_potions + teal_potions + rainbow_potions
         new_red_potions = 0
         new_green_potions = 0
         new_blue_potions = 0
@@ -224,11 +257,21 @@ def get_bottle_plan():
         new_dark_potions = 0
         new_white_potions = 0
         new_teal_potions = 0
+        new_rainbow_potions = 0
 
         print(f"max red potions: {num_red_ml // 100}, max green potions: {num_green_ml // 100}, max blue: {num_blue_ml // 100}, max dark: {num_dark_ml // 100}")
 
         while current_potions < potion_limit:
             made_potion = False
+            if num_red_ml >= 25 and num_green_ml >= 25 and num_blue_ml >= 25 and num_dark_ml >= 25 and (rainbow_potions + new_rainbow_potions) < int(potion_limit / 4) and current_potions < potion_limit:
+                print("HERE")
+                new_rainbow_potions += 1
+                num_red_ml -= 25
+                num_green_ml -= 25
+                num_blue_ml -= 25
+                num_dark_ml -= 25
+                current_potions += 1
+                made_potion = True
             if num_red_ml >= 100 and (red_potions + new_red_potions) < int(potion_limit / 4) and current_potions < potion_limit:
                 new_red_potions += 1
                 num_red_ml -= 100
@@ -258,12 +301,6 @@ def get_bottle_plan():
             if num_red_ml >= 50 and num_green_ml >= 50 and (yellow_potions + new_yellow_potions) < int(potion_limit / 4) and current_potions < potion_limit:
                 new_yellow_potions += 1
                 num_red_ml -= 50
-                num_green_ml -= 50
-                current_potions += 1
-                made_potion = True
-            if num_blue_ml >= 50 and num_green_ml >= 50 and (teal_potions + new_teal_potions) < int(potion_limit / 4) and current_potions < potion_limit:
-                new_teal_potions += 1
-                num_blue_ml -= 50
                 num_green_ml -= 50
                 current_potions += 1
                 made_potion = True
@@ -302,6 +339,8 @@ def get_bottle_plan():
             result.append({"potion_type": potion_requirements["WHITE_POTION_0"], "quantity": new_white_potions})
         if new_teal_potions > 0:
             result.append({"potion_type": potion_requirements["TEAL_POTION_0"], "quantity": new_teal_potions})
+        if new_rainbow_potions > 0:
+            result.append({"potion_type": potion_requirements["RAINBOW_POTION_0"], "quantity": new_rainbow_potions})
     print(result)
     return result
 

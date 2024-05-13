@@ -43,8 +43,10 @@ def get_inventory():
                                            WHERE supply_id = :supply_id"""), {"supply_id" : 13}).scalar()
         teal_potion = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
                                            WHERE supply_id = :supply_id"""), {"supply_id" : 14}).scalar()
+        rainbow_potion = connection.execute(sqlalchemy.text("""SELECT COALESCE(SUM(change), 0) AS balance FROM supply_ledger_entries
+                                           WHERE supply_id = :supply_id"""), {"supply_id" : 15}).scalar()
 
-        num_potions = red_potion + green_potion + blue_potion + dark_potion + purple_potion + yellow_potion + white_potion + teal_potion
+        num_potions = rainbow_potion + red_potion + green_potion + blue_potion + dark_potion + purple_potion + yellow_potion + white_potion + teal_potion
 
         ml_in_barrels = green_ml + blue_ml + red_ml + dark_ml
     
@@ -55,6 +57,7 @@ def get_inventory():
     print("POTIONS: \n")
     print(f"RED: {red_potion}, GREEN: {green_potion}, BLUE: {blue_potion}, DARK: {dark_potion}")
     print(f"PURPLE: {purple_potion}, YELLOW: {yellow_potion}, WHITE: {white_potion}, TEAL: {teal_potion}")
+    print(f"RAINBOW: {rainbow_potion}")
     print("--------------------------------------------------------------------------------")
     print("QUANTITIES: \n")
     print(f"TOTAL POTIONS: {num_potions} || TOTAL ML: {ml_in_barrels} || GOLD: {gold}\n")
