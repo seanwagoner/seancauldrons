@@ -34,6 +34,17 @@ def get_catalog():
             }
             if column[1] > 0:
                 catalog.append(rainbow_potion)
+        if potion_type == [0, 0, 0, 100] and column[1] > 0:
+            print("adding dark")
+            rainbow_potion = {
+                "sku": column[0],
+                "name": column[0].split('_')[0].lower() + " potion",
+                "quantity": column[1],
+                "price": column[2],
+                "potion_type": potion_type
+            }
+            if column[1] > 0:
+                catalog.append(rainbow_potion)
 
     for column in result:
         if len(catalog) >= 6:
@@ -41,7 +52,7 @@ def get_catalog():
         potion_type = [column[3], column[4], column[5], column[6]]
 
 
-        if column[1] > 0 and column[0] != "RAINBOW_POTION_0":
+        if column[1] > 0 and column[0] != "RAINBOW_POTION_0" or "DARK_POTION_0":
             catalog.append({
                 "sku": column[0], 
                 "name": column[0].split('_')[0].lower() + " potion",  
