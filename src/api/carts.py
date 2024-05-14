@@ -197,6 +197,17 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                 """
             ), {'supply_id': supply_id, 'transaction_id': transaction_id, 'change': -quantity})
 
+
+            current_time = connection.execute(sqlalchemy.text("""
+                            SELECT day, hour FROM time_table ORDER BY created_at DESC LIMIT 1;
+                        """)).first()
+            
+            connection.execute(sqlalchemy.text(
+                """INSERT INTO potion_sales (day, hour, supply_id, quantity)
+                VALUES (:day, :hour, :supply_id, :quantity)
+                """
+            ), {'day': current_time.day, 'hour': current_time.hour, 'supply_id': supply_id, 'quantity': quantity})
+
             profit += price * quantity
 
             total_potions_bought += quantity
