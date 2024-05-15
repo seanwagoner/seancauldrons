@@ -69,7 +69,8 @@ def get_catalog():
 
         if any([((current_time.day == "Edgeday" and current_time.hour < 18) or (current_time.day == "Soulday" and current_time.hour >= 18)) and potion_type[0] == 100,
                 ((current_time.day == "Bloomday" and current_time.hour < 18) or (current_time.day == "Edgeday" and current_time.hour >= 18)) and potion_type[1] == 100,
-                ((current_time.day == "Arcanaday" and current_time.hour < 18) or (current_time.day == "Bloomday" and current_time.hour >= 18)) and potion_type[2] == 100]):
+                ((current_time.day == "Arcanaday" and current_time.hour < 18) or (current_time.day == "Bloomday" and current_time.hour >= 18)) and potion_type[2] == 100,
+                (current_time.day == "Blesseday" and current_time.hour < 18) and potion_type[2] == 100]):
             print(f"It is {current_time.day} at {current_time.hour}. Not adding {column[0]} to catalog.\n")
             continue
 
