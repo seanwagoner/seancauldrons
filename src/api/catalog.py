@@ -61,6 +61,7 @@ def get_catalog():
             }
             if column[1] > 0:
                 catalog.append(dark_potion)
+        
 
     for column in result:
         if len(catalog) >= 6:
@@ -73,8 +74,11 @@ def get_catalog():
             print(f"It is {current_time.day} at {current_time.hour}. Not adding {column[0]} to catalog.\n")
             continue
 
+        if potion_type == [50,50,0,0]:
+            print(column[1])
+        
 
-        if column[1] > 0 and column[0] != "RAINBOW_POTION_0" or "DARK_POTION_0":
+        if column[1] > 0 or column[0] not in ["RAINBOW_POTION_0", "DARK_POTION_0", "YELLOW_POTION_0"]:
             catalog.append({
                 "sku": column[0], 
                 "name": column[0].split('_')[0].lower() + " potion",  
@@ -82,6 +86,8 @@ def get_catalog():
                 "price": column[2],  
                 "potion_type": potion_type
             })
+        else:
+            continue
         
         print(catalog)
     
