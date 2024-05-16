@@ -329,10 +329,10 @@ def get_bottle_plan():
             result.append({"potion_type": potion_requirements["GREEN_POTION_0"], "quantity": new_green_potions})
         if new_blue_potions > 0:
             result.append({"potion_type": potion_requirements["BLUE_POTION_0"], "quantity": new_blue_potions})
-        if new_yellow_potions > 0:
-            result.append({"potion_type": potion_requirements["PURPLE_POTION_0"], "quantity": new_yellow_potions})
         if new_purple_potions > 0:
-            result.append({"potion_type": potion_requirements["YELLOW_POTION_0"], "quantity": new_purple_potions})
+            result.append({"potion_type": potion_requirements["PURPLE_POTION_0"], "quantity": new_purple_potions})
+        if new_yellow_potions > 0:
+            result.append({"potion_type": potion_requirements["YELLOW_POTION_0"], "quantity": new_yellow_potions})
         if new_dark_potions > 0:
             result.append({"potion_type": potion_requirements["DARK_POTION_0"], "quantity": new_dark_potions})
         if new_white_potions > 0:
