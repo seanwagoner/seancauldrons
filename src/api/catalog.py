@@ -26,43 +26,7 @@ def get_catalog():
         print(f"\nCurrent time: {current_time.day}  {current_time.hour}\n")
         
     catalog = []
-    for column in result:
-        potion_type = [column[3], column[4], column[5], column[6]]
-        if potion_type == [25, 25, 25, 25] and column[1] > 0:
-            print("adding rainbow")
-            rainbow_potion = {
-                "sku": column[0],
-                "name": column[0].split('_')[0].lower() + " potion",
-                "quantity": column[1],
-                "price": column[2],
-                "potion_type": potion_type
-            }
-            if column[1] > 0:
-                catalog.append(rainbow_potion)
-        if potion_type == [33, 34, 33, 0] and column[1] > 0:
-            print("adding white")
-            white_potion = {
-                "sku": column[0],
-                "name": column[0].split('_')[0].lower() + " potion",
-                "quantity": column[1],
-                "price": column[2],
-                "potion_type": potion_type
-            }
-            if column[1] > 0:
-                catalog.append(white_potion)
-        if potion_type == [0, 0, 0, 100] and column[1] > 0:
-            print("adding dark")
-            dark_potion = {
-                "sku": column[0],
-                "name": column[0].split('_')[0].lower() + " potion",
-                "quantity": column[1],
-                "price": column[2],
-                "potion_type": potion_type
-            }
-            if column[1] > 0:
-                catalog.append(dark_potion)
         
-
     for column in result:
         if len(catalog) >= 6:
             break
@@ -78,7 +42,7 @@ def get_catalog():
             print(column[1])
         
 
-        if column[1] > 0 or column[0] not in ["RAINBOW_POTION_0", "DARK_POTION_0", "YELLOW_POTION_0"]:
+        if column[1] > 0:
             catalog.append({
                 "sku": column[0], 
                 "name": column[0].split('_')[0].lower() + " potion",  
