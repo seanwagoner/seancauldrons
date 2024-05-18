@@ -272,32 +272,32 @@ def get_bottle_plan():
                 num_dark_ml -= 25
                 current_potions += 1
                 made_potion = True
-            if num_red_ml >= 100 and (red_potions + new_red_potions) < int(potion_limit / 4) and current_potions < potion_limit:
+            if num_red_ml >= 100 and (red_potions + new_red_potions) < int(potion_limit / 5) and current_potions < potion_limit:
                 new_red_potions += 1
                 num_red_ml -= 100
                 current_potions += 1
                 made_potion = True
-            if num_green_ml >= 100 and (green_potions + new_green_potions) < int(potion_limit / 4) and current_potions < potion_limit:
+            if num_green_ml >= 100 and (green_potions + new_green_potions) < int(potion_limit / 5) and current_potions < potion_limit:
                 new_green_potions += 1
                 num_green_ml -= 100
                 current_potions += 1
                 made_potion = True
-            if num_blue_ml >= 100 and (blue_potions + new_blue_potions) < int(potion_limit / 6) and current_potions < potion_limit:
+            if num_blue_ml >= 100 and (blue_potions + new_blue_potions) < int(potion_limit / 5) and current_potions < potion_limit:
                 new_blue_potions += 1
                 num_blue_ml -= 100
                 current_potions += 1
                 made_potion = True
-            if num_dark_ml >= 100 and (dark_potions + new_dark_potions) < int(potion_limit / 4) and current_potions < potion_limit:
+            if num_dark_ml >= 100 and (dark_potions + new_dark_potions) < int(potion_limit / 5) and current_potions < potion_limit:
                 new_dark_potions += 1
                 num_dark_ml -= 100
                 current_potions += 1
                 made_potion = True
-            # if num_red_ml >= 50 and num_blue_ml >= 50 and (purple_potions + new_purple_potions) < int(potion_limit / 10) and current_potions < potion_limit:
-            #     new_purple_potions += 1
-            #     num_red_ml -= 50
-            #     num_blue_ml -= 50
-            #     current_potions += 1
-            #     made_potion = True
+            if num_red_ml >= 50 and num_blue_ml >= 50 and (purple_potions + new_purple_potions) < int(potion_limit / 5) and current_potions < potion_limit:
+                new_purple_potions += 1
+                num_red_ml -= 50
+                num_blue_ml -= 50
+                current_potions += 1
+                made_potion = True
             if num_red_ml >= 50 and num_green_ml >= 50 and (yellow_potions + new_yellow_potions) < int(potion_limit / 5) and current_potions < potion_limit:
                 new_yellow_potions += 1
                 num_red_ml -= 50
