@@ -304,13 +304,13 @@ def get_bottle_plan():
                 num_green_ml -= 50
                 current_potions += 1
                 made_potion = True
-            if num_red_ml >= 33 and num_green_ml >= 34 and num_blue_ml >= 33 and (white_potions + new_white_potions) < int(potion_limit / 5) and current_potions < potion_limit:
-                new_white_potions += 1
-                num_red_ml -= 33
-                num_green_ml -= 34
-                num_blue_ml -= 33
-                current_potions += 1
-                made_potion = True
+            # if num_red_ml >= 33 and num_green_ml >= 34 and num_blue_ml >= 33 and (white_potions + new_white_potions) < int(potion_limit / 5) and current_potions < potion_limit:
+            #     new_white_potions += 1
+            #     num_red_ml -= 33
+            #     num_green_ml -= 34
+            #     num_blue_ml -= 33
+            #     current_potions += 1
+            #     made_potion = True
             if not made_potion:
                 break
 
