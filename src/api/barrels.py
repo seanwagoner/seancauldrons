@@ -302,6 +302,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         )
 
     print(f"purchase plan : {purchase_plan}")
+    purchase_plan = []
 
     return purchase_plan
 
