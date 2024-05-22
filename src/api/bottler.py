@@ -268,7 +268,7 @@ def get_bottle_plan():
 
         potion_limit = connection.execute(sqlalchemy.text("""SELECT potion_capacity FROM global_inventory""")).fetchone()[0]
 
-        current_potions = red_potions + green_potions + blue_potions + dark_potions + purple_potions + yellow_potions + white_potions + teal_potions + rainbow_potions
+        current_potions = orange_potions + red_potions + green_potions + blue_potions + dark_potions + purple_potions + yellow_potions + white_potions + teal_potions + rainbow_potions
         new_red_potions = 0
         new_green_potions = 0
         new_blue_potions = 0
@@ -341,10 +341,6 @@ def get_bottle_plan():
             #     made_potion = True
             if not made_potion:
                 break
-
-        while current_potions > potion_limit:
-            new_red_potions -= 1
-            current_potions -= 1
         
         print(f"limit: {potion_limit}")
         print(f"current potions: {current_potions}")
