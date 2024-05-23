@@ -59,7 +59,7 @@ def get_inventory():
     print("POTIONS: \n")
     print(f"RED: {red_potion}, GREEN: {green_potion}, BLUE: {blue_potion}, DARK: {dark_potion}")
     print(f"PURPLE: {purple_potion}, YELLOW: {yellow_potion}, WHITE: {white_potion}, TEAL: {teal_potion}")
-    print(f"RAINBOW: {rainbow_potion}")
+    print(f"RAINBOW: {rainbow_potion}, ORANGE: {orange_potion}")
     print("--------------------------------------------------------------------------------")
     print("QUANTITIES: \n")
     print(f"TOTAL POTIONS: {num_potions} || TOTAL ML: {ml_in_barrels} || GOLD: {gold}\n")

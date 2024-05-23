@@ -45,7 +45,7 @@ def get_catalog():
                 "price": column[2],  
                 "potion_type": potion_type
             })
-        if column[1] > 0 and column[0] == "GREEN_POTION_0":
+        if column[1] > 0 and column[0] == "BLUE_POTION_0":
             catalog.append({
                 "sku": column[0], 
                 "name": column[0].split('_')[0].lower() + " potion",  
@@ -69,7 +69,7 @@ def get_catalog():
                 "price": column[2],  
                 "potion_type": potion_type
             })
-        if column[1] > 0 and column[0] == "WHITE_POTION_0":
+        if column[1] > 0 and column[0] == "ORANGE_POTION_0":
             catalog.append({
                 "sku": column[0], 
                 "name": column[0].split('_')[0].lower() + " potion",  
